@@ -32,6 +32,11 @@ module CC = struct
   (** [extend x t ctx] returns [ctx] extended with variable [x] of type [t]. *)
   let extend x t ctx = (x, t) :: ctx
 
+  let print_var = function
+    | String s -> s
+    | Gensym (s, _) -> s
+    | Dummy -> "Dummy"
+
 
   (* SUBSTITUTION *)
 
@@ -109,7 +114,7 @@ module CC = struct
       (try 
          well_formed ctx; lookup_ty x ctx
          with 
-            | Not_found -> raise (Error "Undefined variable")
+            | Not_found -> raise (Error ("Unbound variable: " ^ (print_var x)))
             | Error _ -> raise (Error "Mal-formed context"))
     | Universe k -> 
       (try well_formed ctx; Universe (k + 1)

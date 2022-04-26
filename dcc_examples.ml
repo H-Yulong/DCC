@@ -16,11 +16,11 @@ let _ = infer_type ctx (Label(Lab "Id1", []))
 let _ = normalize ctx (Apply((Apply(Label(Lab "Id1", []), UnitType)), Unit))
 let _ = type_check ctx (Label(Lab "Id1", [])) t
 
-(*
+
 let d = mk_def [(String "A", Universe 0); (String "y", Var (String "A"))] (String "x") (Universe 0) (Var (String "A")) (Var (String "y"))
 
 let l = Label (Lab "D", [UnitType; Unit])
 let ctx2 = mk_ctx [(Lab "D", d)] []
 
 let _ = infer_label ctx2 (Lab "D", [UnitType; Unit])
-*)
+
