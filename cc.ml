@@ -95,13 +95,12 @@ module CC = struct
         | Var x1, Var x2 -> x1 = x2
         | App (e11, e12), App (e21, e22) -> equal e11 e21 && equal e12 e22
         | Universe k1, Universe k2 -> k1 = k2
-        | Pi a1, Pi a2 -> equal_abstraction a1 a2
-        | Lambda a1, Lambda a2 -> equal_abstraction a1 a2
+        | Pi (x, t1, e1), Pi (y, t2, e2) -> equal t1 t2 && (equal e1 (subst [(y, Var x)] e2))
+        | Lambda (x, t1, e1), e2 -> equal e1 (normalize (extend x t1 ctx) (App(e2, Var x)))
+        | e1, Lambda (y, t2, e2) -> equal (normalize (extend y t2 ctx) (App(e1, Var y))) e2
         | UnitType, UnitType -> true
         | Unit, Unit -> true
-        | (Var _ | App _ | Universe _ | Pi _ | Lambda _ | UnitType | Unit), _ -> false
-    and equal_abstraction (x, t1, e1) (y, t2, e2) =
-      equal t1 t2 && (equal e1 (subst [(y, Var x)] e2))
+        | _, _ -> false
     in
       equal (normalize ctx e1) (normalize ctx e2)
 

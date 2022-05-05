@@ -108,32 +108,38 @@ module Defun = struct
 		| Unit -> Unit
 		| UnitType -> UnitType
 
+	(* Substitute, then normalize. Use in [equal]. *)
+	let subst_normal ctx s e = normalize ctx (subst s e)
+
 	(* EQUIVALENCE *)
-	(** [equal ctx e1 e2] determines whether normalized [e1] and [e2] are equivalent up to renaming
-	    of bound variables. 
+	(** [equal ctx e1 e2] determines whether normalized [e1] and [e2] are equivalent up to alpha-eta equivalence. 
 		For labels (l1, es1) and (l2, es2), they are equivalent if:
-			- l1 points to ([(xs, _)], x, _, _, e1) in Def
-			- l2 points to ([(ys, _)], y, _, _, e2) in Def
+			- l1 points to ({xs : _}, x, Ax, Bx, e1) in Def
+			- l2 points to ({ys : _}, y, Ay, By, e2) in Def
+			- Ax[es1 / xs] == Ay[es2 / ys]
+			- Bx[es1 / xs] == By[es2 / ys, x / y]
 			- e1[es1 / xs] == e2[es2 / ys, x / y]
+		Eta equivalence of (l, es) and e2:
+			- l1 points to ({xs : _}, x, A, _, e) in Def
+			- e[es / xs] == Apply(e2, x) in the context extended with x : A[es / xs]
 	*)
 	let equal ctx e1 e2 = 
 		let rec equal e1 e2 =
 			match e1, e2 with
 				| Var x, Var y -> x = y
 				| Universe k1, Universe k2 -> k1 = k2
-				| Label (l1, es1), Label (l2, es2) -> equal_labels (l1, es1) (l2, es2) 
+				| Label (l1, es1), e2 -> eta_labels (l1, es1) e2
+				| e1, Label(l2, es2) -> eta_labels (l2, es2) e1
 				| Apply (e11, e12), Apply (e21, e22) -> equal e11 e21 && equal e12 e22
 				| Pi (x, t1, e1) , Pi (y, t2, e2) -> equal t1 t2 && equal e1 (subst [(y, Var x)] e2)
 				| Unit, Unit -> true
 				| UnitType, UnitType -> true
-				| (Var _ | Apply _ | Universe _ | Label _ | Pi _ | UnitType | Unit), _ -> false
-		and equal_labels (l1, es1) (l2, es2) = 
-			try 
-				let d1 = lookup_def l1 ctx in
-				let d2 = lookup_def l2 ctx in
-				let sub1 = apply_prep d1.fvs es1 in
-				let sub2 = apply_prep d2.fvs es2 in
-					equal (subst sub1 d1.expr) (subst ((d2.var, Var d1.var) :: sub2) d2.expr)
+				| _, _ -> false
+		and eta_labels (l, es) e2 = 
+			try
+				let d = lookup_def l ctx in
+				let sub = apply_prep d.fvs es in
+					equal (subst_normal ctx sub d.expr) (normalize (extend_var d.var (subst_normal ctx sub d.dom) ctx) (Apply(e2, Var d.var)))
 			with Not_found -> raise (Error "Label not found")
 		in
 			equal (normalize ctx e1) (normalize ctx e2)
