@@ -46,13 +46,8 @@ let compose =
 			App (App (Var (String "g"), Var (String "x")), App (Var (String "f"), Var (String "x")))
 	))))))
 
+(* Step 1: Have Ctx, e, A ready. Label them, i.e. translate them into LCC. *)
 
-let com_type = CC.infer_type [] compose
-let compose_dfc = transform [] compose
-let compose_dfc_type1 = transform [] com_type
-let compose_def = def [] compose
-
-let compose_dfc_type2 = Defun.infer_type (Defun.mk_ctx compose_def []) compose_dfc
-let _ = Defun.type_check (Defun.mk_ctx compose_def []) compose_dfc compose_dfc_type1
-(**)
+let t = CC.infer_type [] compose
+let _ = check_type_preservation [] compose t
 

@@ -12,7 +12,6 @@ module CC = struct
   type variable =
     | String of string
     | Gensym of string * int
-    | Dummy
 
   (* Abstraction (x, A, t) means x:A and x is free in t *)
   type expr =
@@ -35,7 +34,6 @@ module CC = struct
   let print_var = function
     | String s -> s
     | Gensym (s, _) -> s
-    | Dummy -> "Dummy"
 
 
   (* SUBSTITUTION *)
@@ -45,7 +43,6 @@ module CC = struct
     let k = ref 0 in
       function
         | String x | Gensym (x, _) -> (incr k ; Gensym (x, !k))
-        | Dummy -> (incr k ; Gensym ("_", !k))
 
   (** [subst [(x1,e1); ...; (xn;en)] e] performs the given substitution of
       expressions [e1], ..., [en] for variables [x1], ..., [xn] in expression [e]. *)

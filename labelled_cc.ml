@@ -14,7 +14,6 @@ module LCC = struct
   type variable =
     | String of string
     | Gensym of string * int
-    | Dummy
 
   (* Abstraction (x, A, t) means x:A and x is free in t *)
   type expr =
@@ -42,7 +41,10 @@ module LCC = struct
     let k = ref 0 in
       function
         | String x | Gensym (x, _) -> (incr k ; Gensym (x, !k))
-        | Dummy -> (incr k ; Gensym ("_", !k))
+
+  let refresh_label = 
+      let k = ref (-1) in 
+        (fun () -> (incr k); !k)  
 
   (** [subst [(x1,e1); ...; (xn;en)] e] performs the given substitution of
       expressions [e1], ..., [en] for variables [x1], ..., [xn] in expression [e]. *)
@@ -50,7 +52,7 @@ module LCC = struct
     | Var x -> (try List.assoc x s with Not_found -> Var x)
     | Universe k -> Universe k
     | Pi a -> Pi (subst_abstraction s a)
-    | Lambda (a, i) -> Lambda ((subst_abstraction s a), i)
+    | Lambda (a, i) -> Lambda ((subst_abstraction s a), refresh_label ())
     | App (e1, e2) -> App (subst s e1, subst s e2)
     | UnitType -> UnitType
     | Unit -> Unit
@@ -172,18 +174,13 @@ module LCC = struct
    let translate_var = function
    	| CC.String s -> String s
    	| CC.Gensym (s, i) -> Gensym (s, i)
-   	| CC.Dummy -> Dummy
 
    let translate e =
-   	let counter = ref 0 in
    	let rec translate = function
 	   	| CC.Var x -> Var (translate_var x)
 	   	| CC.Universe i -> Universe i
 	   	| CC.Pi (x, t, e) -> Pi (translate_var x, translate t, translate e)
-	   	| CC.Lambda (x, t, e) ->
-	   		let k = !counter in
-	   			incr counter;
-	   			Lambda ((translate_var x, translate t, translate e), k)
+	   	| CC.Lambda (x, t, e) -> Lambda ((translate_var x, translate t, translate e), refresh_label ())
 	   	| CC.App (e1, e2) -> App (translate e1, translate e2)
 	   	| CC.UnitType -> UnitType
 	   	| CC.Unit -> Unit

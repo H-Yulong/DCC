@@ -12,7 +12,6 @@ module Defun = struct
 	type variable = 
 		| String of string 
 		| Gensym of string * int
-		| Dummy
 
 	type label =
 		| Lab of string
@@ -63,7 +62,6 @@ module Defun = struct
 	  let k = ref 0 in
 	    function
 	      | String x | Gensym (x, _) -> (incr k ; Gensym (x, !k))
-	      | Dummy -> (incr k ; Gensym ("_", !k))
 
 	(** [subst [(x1,e1); ...; (xn;en)] e] performs the given substitution of
 	    expressions [e1], ..., [en] for variables [x1], ..., [xn] in expression [e]. *)

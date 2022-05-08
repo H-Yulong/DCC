@@ -10,13 +10,11 @@ open Defun
 let transform_var = function
 	| CC.String s -> String s
 	| CC.Gensym (s, i) -> Gensym (s, i)
-	| CC.Dummy -> Dummy
 
 (* [transform_var x] turns a variable in LCC to a variable in DCC *)
 let transform_lab_var = function
 	| LCC.String s -> String s
 	| LCC.Gensym (s, i) -> Gensym (s, i)
-	| LCC.Dummy -> Dummy
 
 (* [remove x ls] removes all occurences of x in list ls *)
 let rec remove x = function
@@ -53,7 +51,7 @@ let rec fv ctx e =
 let rec transform_lab ctx = function
 	| LCC.Var x -> Var (transform_lab_var x)
 	| LCC.Universe i -> Universe i
-	| LCC.Pi (x, t, e) -> Pi (transform_lab_var x, transform_lab ctx t, transform_lab ctx e)
+	| LCC.Pi (x, t, e) -> Pi (transform_lab_var x, transform_lab ctx t, transform_lab ((x,t) :: ctx) e)
 	| LCC.Lambda ((x, t, e), c) -> 
 		let fvs = List.map (fun x -> Var (transform_lab_var x)) (fv ctx (LCC.Lambda ((x, t, e), c)))
 		in Label(Labsym("_", c), fvs) 
@@ -61,33 +59,48 @@ let rec transform_lab ctx = function
 	| LCC.UnitType -> UnitType
 	| LCC.Unit -> Unit
 
-let transform ctx e = transform_lab (LCC.translate_ctx ctx) (LCC.translate e)
-
-(* [transform_ctx ctx] computes the transformed context from CC.
-   For every x : A in ctx, it normalizes A before transforming A. *)
-let rec transform_ctx = function
-	| [] -> []
-	| (x, t) :: ctx -> (transform_var x, transform ctx (CC.normalize ctx t)) :: transform_ctx ctx
-
-(* [transform_ctx ctx] computes the transformed context from LCC.
-   For every x : A in ctx, it normalizes A before transforming A. *)
+(* [transform_ctx ctx] computes the transformed context from LCC. *)
 let rec transform_lab_ctx = function
 	| [] -> []
-	| (x, t) :: ctx -> (transform_lab_var x, transform_lab ctx (LCC.normalize ctx t)) :: transform_lab_ctx ctx
+	| (x, t) :: ctx -> (transform_lab_var x, transform_lab ctx t) :: transform_lab_ctx ctx
 
-let rec def_lab ctx = function
-	| LCC.Var _ | LCC.Universe _ | LCC.UnitType | LCC.Unit -> []
-	| LCC.Pi (x, t, e) -> (def_lab ctx t) @ (def_lab ((x, t) :: ctx) e)
-	| LCC.App (e1, e2) -> (def_lab ctx e1) @ (def_lab ctx e2)
-	| LCC.Lambda ((x, t, e), c) -> 
+(* [merge_defs l1 l2] merges two definition contexts, used as a helper function in def_lab. *)
+let merge_defs l1 l2 = 
+	let rec f buf = function
+		| [] -> buf
+		| (label, def) :: ls -> 
+			if List.mem_assoc label buf then f buf ls
+			else f ((label, def) :: buf) ls
+	in f l2 (List.rev l1)
+
+(* [def_lab ctx e] returns a list of all the function definitions appeared in the derivation tree of ctx |- e : A. *)
+let rec def_lab_full ctx e ty = match e, ty with
+	| LCC.Var _, _ | LCC.Universe _, _ | LCC.UnitType, _ | LCC.Unit, _ -> []
+	| LCC.Pi (x, t, e), u -> merge_defs (def_lab_full ctx t u) (def_lab_full ((x, t) :: ctx) e u)
+	| LCC.App (e1, e2), t -> 
+		let t1 = LCC.infer_type ctx e1 in
+		let t2 = LCC.infer_type ctx e2 in
+			merge_defs (merge_defs (def_lab_full ctx e1 t1) (def_lab_full ctx e2 t2)) (def_lab_full ctx t (Universe 0))
+	| LCC.Lambda ((x, t, e), c), LCC.Pi(_, _, te) ->
 		let fvs = List.map (fun x -> (transform_lab_var x, transform_lab ctx (LCC.infer_type ctx (LCC.Var x)))) 
 					(fv ctx (LCC.Lambda ((x, t, e), c))) in
 		let ctx' = (x, t) :: ctx in
-		let t' = transform_lab ctx t in 
-		let te = LCC.infer_type ctx' e in
+		let t' = transform_lab ctx t in
 		let te' = transform_lab ctx' te in
 		let e' = transform_lab ctx' e in
-			(Labsym("_", c), (mk_def fvs (transform_lab_var x) t' te' e')) :: (def_lab ctx t) @ (def_lab ctx' e)
+					merge_defs ((Labsym("_", c), (mk_def fvs (transform_lab_var x) t' te' e')) :: (def_lab_full ctx t (Universe 0))) (def_lab_full ctx' e te)
 
-(* [def ctx e] computes all the lambda definitions in e. *)
-let def ctx e = def_lab (LCC.translate_ctx ctx) (LCC.translate e)
+	| _, _ -> raise (Defun.Error "Error in transformation!")
+
+let def_lab ctx e = def_lab_full ctx e (LCC.infer_type ctx e)
+
+let rec def_ctx_lab = function
+	| [] -> []
+	| (x, t) :: ctx -> (def_lab ctx t) @ (def_ctx_lab ctx)
+
+let check_type_preservation ctx e t = 
+	let ctx' = LCC.translate_ctx ctx in
+	let e' = LCC.translate e in
+	let t' = LCC.translate t in
+	let defs = merge_defs (merge_defs (def_lab ctx' t') (def_lab ctx' e')) (def_ctx_lab ctx')in
+		type_check (mk_ctx defs (transform_lab_ctx ctx')) (transform_lab ctx' e') (transform_lab ctx' t')
