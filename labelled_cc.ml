@@ -64,31 +64,31 @@ module LCC = struct
 
   (* REDUCTION *)
 
-  (** [normalize ctx e] normalizes the given expression [e] in context [ctx]. It removes
+  (** [normalize e] normalizes the given expression [e]. It removes
       all redexes and it unfolds all definitions. It performs normalization under binders.  *)
-  let rec normalize ctx = function
+  let rec normalize = function
     | Var x -> Var x
     | App (e1, e2) ->
-      let e2 = normalize ctx e2 in
-        (match normalize ctx e1 with
-          | Lambda ((x, _, e1'), _) -> normalize ctx (subst [(x,e2)] e1')
+      let e2 = normalize e2 in
+        (match normalize e1 with
+          | Lambda ((x, _, e1'), _) -> normalize (subst [(x,e2)] e1')
           | e1 -> App (e1, e2))
     | Universe k -> Universe k
-    | Pi a -> Pi (normalize_abstraction ctx a)
-    | Lambda (a, i) -> Lambda ((normalize_abstraction ctx a), i)
+    | Pi a -> Pi (normalize_abstraction a)
+    | Lambda (a, i) -> Lambda ((normalize_abstraction a), i)
     | UnitType -> UnitType
     | Unit -> Unit
 
-  and normalize_abstraction ctx (x, t, e) =
-    let t = normalize ctx t in
-      (x, t, normalize (extend x t ctx) e)
+  and normalize_abstraction (x, t, e) =
+    let t = normalize t in
+      (x, t, normalize e)
 
 
   (* EQUIVALENCE *)
 
-  (** [equal ctx e1 e2] determines whether normalized [e1] and [e2] are equivalent up to renaming
+  (** [equal e1 e2] determines whether normalized [e1] and [e2] are equivalent up to renaming
       of bound variables. *)
-  let equal ctx e1 e2 =
+  let equal e1 e2 =
     let rec equal e1 e2 =
       match e1, e2 with
         | Var x1, Var x2 -> x1 = x2
@@ -102,7 +102,7 @@ module LCC = struct
     and equal_abstraction (x, t1, e1) (y, t2, e2) =
       equal t1 t2 && (equal e1 (subst [(y, Var x)] e2))
     in
-      equal (normalize ctx e1) (normalize ctx e2)
+      equal (normalize e1) (normalize e2)
 
 
   (* TYPE INFERENCE *)
@@ -129,7 +129,7 @@ module LCC = struct
     | App (e1, e2) ->
       let (x, s, t) = infer_pi ctx e1 in
       let te = infer_type ctx e2 in
-        check_equal ctx s te ;
+        check_equal s te ;
         subst [(x, e2)] t
     | UnitType -> Universe 0
     | Unit -> UnitType
@@ -137,7 +137,7 @@ module LCC = struct
   (** [infer_universe ctx t] infers the universe level of type [t] in context [ctx]. *)
   and infer_universe ctx t =
     let u = infer_type ctx t in
-      match normalize ctx u with
+      match normalize u with
         | Universe k -> k
         | App _ | Var _ | Pi _ | Lambda _ | UnitType | Unit -> raise (Error "Not a universe")
 
@@ -145,13 +145,13 @@ module LCC = struct
       of the form [Pi (x, t1, t2)] and returns the triple [(x, t1, t2)]. *)
   and infer_pi ctx e =
     let t = infer_type ctx e in
-      match normalize ctx t with
+      match normalize t with
         | Pi a -> a
         | Var _ | App _ | Universe _ | Lambda _ | UnitType | Unit -> raise (Error "Not a pi-type") 
 
-  (** [check_equal ctx e1 e2] checks that expressions [e1] and [e2] are equal. *)
-  and check_equal ctx e1 e2 =
-    if not (equal ctx e1 e2)
+  (** [check_equal e1 e2] checks that expressions [e1] and [e2] are equal. *)
+  and check_equal e1 e2 =
+    if not (equal e1 e2)
     then raise (Error "Argument type does not match")
 
   and well_formed = function
@@ -167,8 +167,8 @@ module LCC = struct
       try 
         let _ = infer_universe ctx t in
         let te = infer_type ctx e in
-        let t' = normalize ctx t in
-          equal ctx te t'
+        let t' = normalize t in
+          equal te t'
       with Error msg -> raise (Error msg)
 
    let translate_var = function
@@ -192,6 +192,6 @@ module LCC = struct
     *)
     let rec translate_ctx = function
       | [] -> []
-      | (x, t) :: ctx -> (translate_var x, translate (CC.normalize ctx t)) :: translate_ctx ctx
+      | (x, t) :: ctx -> (translate_var x, translate (CC.normalize t)) :: translate_ctx ctx
 
 end;;
