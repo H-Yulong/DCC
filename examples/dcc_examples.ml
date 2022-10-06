@@ -1,10 +1,10 @@
 (* #use "dcc_examples.ml";; *)
 
-#use "defun.ml"
+#use "dcc.ml"
 
 (* DCC EXAMPLES *)
 
-open Defun
+open DCC
 
 let id2 = (Lab "Id2", mk_def [(String "A", Universe 0)] (String "x") (Var (String "A")) (Var (String "A")) (Var (String "x")))
 let id1 = (Lab "Id1", mk_def [] (String "A") (Universe 0) (Pi (String "x", Var (String "A"), Var (String "A"))) (Label(Lab "Id2", [Var (String "A")])))

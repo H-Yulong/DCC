@@ -73,13 +73,18 @@ module CC = struct
           | e1 -> App (e1, e2))
     | Universe k -> Universe k
     | Pi a -> Pi (normalize_abstraction ctx a)
-    | Lambda a -> Lambda (normalize_abstraction ctx a)
+    | Lambda a -> Lambda(normalize_abstraction ctx a) (* normalize_eta ctx a *)
     | UnitType -> UnitType
     | Unit -> Unit
 
   and normalize_abstraction ctx (x, t, e) =
     let t = normalize ctx t in
       (x, t, normalize (extend x t ctx) e)
+
+(*   and normalize_eta ctx (x, t, e) =
+    match e with
+      | App(e', Var y) -> if y == x then e' else Lambda(normalize_abstraction ctx (x, t, App(e', Var y)))
+      | _ -> Lambda(normalize_abstraction ctx (x, t, e)) *)
 
 
   (* EQUIVALENCE *)

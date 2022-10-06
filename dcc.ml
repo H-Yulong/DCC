@@ -4,7 +4,7 @@
    with infinite universe hierarchy and unit type.
 *)
 
-module Defun = struct 
+module DCC = struct 
 
 	(* SYNTAX *)
 	exception Error of string
@@ -150,9 +150,10 @@ module Defun = struct
 
 	(* This is a helper function for type-checking label terms. 
 
-	   [check_equal_list ts fvs] takes ts = [t1, ..., tn], a list of types, 
+	   [check_equal_list ts fvs] takes:
+	   	 ts = [(e1, t1), ..., (en, tn)], a list of expression * type pairs, 
 	   and fvs = [(x1, tx1), ..., (xn, txn)], a list of variable * type pairs,
-	   and checks if t1 == tx1 in ctx, t2 == tx2 in (x1, tx1) :: ctx, ... etc.
+	   and checks if t1 == tx1, t2 == tx2[e1 / x1], ... , tn == txn[e1 / x1, ..., e_n-1/ x_n-1].
 	   It returns () if everything checks; otherwise it raises an error.
 	 *)
 	let rec check_equal_list ctx ts fvs = 

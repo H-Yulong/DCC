@@ -2,9 +2,9 @@
 
 #use "cc.ml"
 #use "labelled_cc.ml"
-#use "defun.ml"
+#use "dcc.ml"
 
-open Defun
+open DCC
 
 (* [transform_var x] turns a variable in CC to a variable in DCC *)
 let transform_var = function
@@ -21,6 +21,14 @@ let rec remove x = function
 	| [] -> []
 	| (y :: ys) -> if (x = y) then remove x ys else y :: (remove x ys)
 
+let remove_dup ls = 
+	let rec remove_dup2 l1 l2 =
+		match l2 with
+		| [] -> l1
+		| (x :: xs) -> if List.mem x l1 then remove_dup2 l1 xs else remove_dup2 (x :: l1) xs
+	in
+	   List.rev (remove_dup2 [] ls)
+
 (* [fv_t e] returns a list of free variables in the LCC expression e 
 	fv_t stands for "free variables in a term" *)
 let fv_t e = 
@@ -30,7 +38,7 @@ let fv_t e =
 		| LCC.Pi (x, t, e) | LCC.Lambda ((x, t, e), _) -> (fv_t t) @ (remove x (fv_t e)) 
 		| LCC.App (e1, e2) -> (fv_t e1) @ (fv_t e2)
 	in
-		List.sort_uniq compare (fv_t e)
+		remove_dup (fv_t e)
 
 (* [fv e] returns the list of free variables needed to type a LCC expression e 
 	This is a helper function for transforming lambda terms.
@@ -44,7 +52,7 @@ let rec fv ctx e =
 			@ (fv_vars xs) 
 			@ fvs
 	in
-		List.sort_uniq compare (fv_vars fvs)
+		remove_dup (fv_vars fvs)
 
 
 (* [transform_lab ctx e] computes the defunctionalized term in DCC for e in LCC. *)
@@ -65,7 +73,7 @@ let rec transform_lab_ctx = function
 	| (x, t) :: ctx -> (transform_lab_var x, transform_lab ctx t) :: transform_lab_ctx ctx
 
 (* [merge_defs l1 l2] merges two definition contexts, used as a helper function in def_lab. *)
-let merge_defs l1 l2 = 
+let merge_defs l1 l2 =
 	let rec f buf = function
 		| [] -> buf
 		| (label, def) :: ls -> 
@@ -90,7 +98,7 @@ let rec def_lab_full ctx e ty = match e, ty with
 		let e' = transform_lab ctx' e in
 					merge_defs ((Labsym("_", c), (mk_def fvs (transform_lab_var x) t' te' e')) :: (def_lab_full ctx t (Universe 0))) (def_lab_full ctx' e te)
 
-	| _, _ -> raise (Defun.Error "Error in transformation!")
+	| _, _ -> raise (DCC.Error "Error in transformation!")
 
 let def_lab ctx e = def_lab_full ctx e (LCC.infer_type ctx e)
 
@@ -104,3 +112,15 @@ let check_type_preservation ctx e t =
 	let t' = LCC.translate t in
 	let defs = merge_defs (merge_defs (def_lab ctx' t') (def_lab ctx' e')) (def_ctx_lab ctx')in
 		type_check (mk_ctx defs (transform_lab_ctx ctx')) (transform_lab ctx' e') (transform_lab ctx' t')
+
+let transform_full ctx e t = 
+	let ctx' = LCC.translate_ctx ctx in
+	let e' = LCC.translate e in
+	let t' = LCC.translate t in
+	let defs = merge_defs (merge_defs (def_lab ctx' t') (def_lab ctx' e')) (def_ctx_lab ctx') in
+	let dcc_ctx = mk_ctx defs (transform_lab_ctx ctx') in
+		(dcc_ctx, transform_lab ctx' e', transform_lab ctx' t')
+
+let transform ctx e = 
+	let t = CC.infer_type ctx e in transform_full ctx e t
+		
