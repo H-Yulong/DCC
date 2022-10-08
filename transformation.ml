@@ -1,8 +1,8 @@
 (* #use "transformation.ml";; *)
 
-#use "cc.ml"
-#use "labelled_cc.ml"
-#use "dcc.ml"
+open Cc
+open Labelled_cc
+open Dcc
 
 open DCC
 

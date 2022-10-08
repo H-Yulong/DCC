@@ -5,6 +5,8 @@
    !!! Should only be used as an internal representation. !!!
 *)
 
+open Cc
+
 module LCC = struct
 
   (* SYNTAX *)

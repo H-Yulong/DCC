@@ -3,4 +3,7 @@
 /old
 dune
 dune-project
+*.byte
+*.cmi
+*.cmo
 

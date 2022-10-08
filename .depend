@@ -1,0 +1,40 @@
+cc.cmo : \
+    cc.cmi
+cc.cmx : \
+    cc.cmi
+cc.cmi :
+dcc.cmo : \
+    dcc.cmi
+dcc.cmx : \
+    dcc.cmi
+dcc.cmi :
+err.cmo :
+err.cmx :
+ex.cmo :
+ex.cmx :
+jsmain.cmo : \
+    cc.cmi
+jsmain.cmx : \
+    cc.cmx
+labelled_cc.cmo : \
+    cc.cmi \
+    labelled_cc.cmi
+labelled_cc.cmx : \
+    cc.cmx \
+    labelled_cc.cmi
+labelled_cc.cmi : \
+    cc.cmi
+transformation.cmo : \
+    labelled_cc.cmi \
+    dcc.cmi \
+    cc.cmi \
+    transformation.cmi
+transformation.cmx : \
+    labelled_cc.cmx \
+    dcc.cmx \
+    cc.cmx \
+    transformation.cmi
+transformation.cmi : \
+    labelled_cc.cmi \
+    dcc.cmi \
+    cc.cmi
