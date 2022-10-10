@@ -15,6 +15,7 @@ module CC :
     val lookup_ty : 'a -> ('a * 'b) list -> 'b
     val extend : 'a -> 'b -> ('a * 'b) list -> ('a * 'b) list
     val print_var : variable -> string
+    val pprint : expr -> string
     val refresh : variable -> variable
     val subst : (variable * expr) list -> expr -> expr
     val subst_abstraction :

@@ -35,6 +35,10 @@ module CC = struct
     | String s -> s
     | Gensym (s, _) -> s
 
+  let pprint = function
+    | Var x -> print_var x
+    | Universe i -> "U" ^ (string_of_int i)
+    | _ -> "Not ready"
 
   (* SUBSTITUTION *)
 

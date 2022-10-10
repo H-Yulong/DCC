@@ -8,13 +8,20 @@ dcc.cmo : \
 dcc.cmx : \
     dcc.cmi
 dcc.cmi :
-err.cmo :
-err.cmx :
+err.cmo : \
+    err.cmi
+err.cmx : \
+    err.cmi
+err.cmi :
 ex.cmo :
 ex.cmx :
 jsmain.cmo : \
+    parser.cmi \
+    lexer.cmo \
     cc.cmi
 jsmain.cmx : \
+    parser.cmx \
+    lexer.cmx \
     cc.cmx
 labelled_cc.cmo : \
     cc.cmi \
@@ -23,6 +30,20 @@ labelled_cc.cmx : \
     cc.cmx \
     labelled_cc.cmi
 labelled_cc.cmi : \
+    cc.cmi
+lexer.cmo : \
+    parser.cmi \
+    err.cmi
+lexer.cmx : \
+    parser.cmx \
+    err.cmx
+parser.cmo : \
+    cc.cmi \
+    parser.cmi
+parser.cmx : \
+    cc.cmx \
+    parser.cmi
+parser.cmi : \
     cc.cmi
 transformation.cmo : \
     labelled_cc.cmi \

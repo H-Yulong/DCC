@@ -8,14 +8,13 @@
 #	make depend
 
 # Flags 
-YACC = menhir --explain --strict --reference-graph
+YACC = menhir --explain --strict --reference-graph --infer
 COMPILEFLAGS = -g
 
 # File names
 INCLUDE = 
-DEPEND = 
-PARSER =  parser.ml parser.mli
-OBJECTS = cc.cmo
+DEPEND += lexer.ml parser.ml
+OBJECTS = err.cmo parser.cmo lexer.cmo cc.cmo 
 
 all: $(DEPEND) $(OBJECTS)
 	ocamlfind ocamlc -package js_of_ocaml -package js_of_ocaml-ppx -linkpkg -o jsmain.byte $(OBJECTS) jsmain.ml
@@ -32,9 +31,15 @@ include .depend
 %.cmo : %.ml
 	ocamlc $(COMPILEFLAGS) -c $<
 
+# Generate ML files from a lexer definition file
+%.ml %.mli: %.mll
+	@rm -f $@
+	ocamllex $<
+	@chmod -w $@
+
 # Generate ML files from a parser definition file
 parser.ml parser.mli: parser.mly
-	@rm -f $(PARSER)
+	@rm -f parser.ml parser.mli
 	$(YACC) -v parser.mly
 	@chmod -w parser.ml parser.mli
 	
@@ -43,5 +48,6 @@ depend:: $(DEPEND)
 	ocamldep $(INCLUDE) *.mli *.ml > .depend
 
 clean:: 
-	rm jsmain.js jsmain.byte *.cmi *.cmo $(PARSER)
+	rm -rf jsmain.js jsmain.byte *.cmi *.cmo lexer.ml parser.ml parser.mli \
+	   parser.output parser.automaton parser.conflicts parser.dot
 
