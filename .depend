@@ -16,7 +16,7 @@ err.cmi :
 ex.cmo :
 ex.cmx :
 jsmain.cmo : \
-    parser.cmi \
+    parser.cmo \
     lexer.cmo \
     cc.cmi
 jsmain.cmx : \
@@ -32,19 +32,15 @@ labelled_cc.cmx : \
 labelled_cc.cmi : \
     cc.cmi
 lexer.cmo : \
-    parser.cmi \
+    parser.cmo \
     err.cmi
 lexer.cmx : \
     parser.cmx \
     err.cmx
 parser.cmo : \
-    cc.cmi \
-    parser.cmi
-parser.cmx : \
-    cc.cmx \
-    parser.cmi
-parser.cmi : \
     cc.cmi
+parser.cmx : \
+    cc.cmx
 transformation.cmo : \
     labelled_cc.cmi \
     dcc.cmi \

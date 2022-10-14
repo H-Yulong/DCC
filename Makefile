@@ -14,7 +14,7 @@ COMPILEFLAGS = -g
 # File names
 INCLUDE = 
 DEPEND += lexer.ml parser.ml
-OBJECTS = err.cmo parser.cmo lexer.cmo cc.cmo 
+OBJECTS = err.cmo cc.cmo parser.cmo lexer.cmo 
 
 all: $(DEPEND) $(OBJECTS)
 	ocamlfind ocamlc -package js_of_ocaml -package js_of_ocaml-ppx -linkpkg -o jsmain.byte $(OBJECTS) jsmain.ml

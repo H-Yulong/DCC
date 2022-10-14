@@ -6,6 +6,7 @@ dune-project
 *.byte
 *.cmi
 *.cmo
+*.exe
 lexer.ml 
 parser.ml 
 parser.mli

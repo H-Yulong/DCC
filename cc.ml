@@ -25,6 +25,8 @@ module CC = struct
 
   type context = (variable * expr) list
 
+  (* UTILITY FUNCTIONS *)
+
   (** [lookup_ty x ctx] returns the type of [x] in context [ctx]. *)
   let lookup_ty x ctx = List.assoc x ctx
 
@@ -35,10 +37,15 @@ module CC = struct
     | String s -> s
     | Gensym (s, _) -> s
 
-  let pprint = function
+  (* Pretty-printing *)
+  let rec pprint = function
     | Var x -> print_var x
     | Universe i -> "U" ^ (string_of_int i)
-    | _ -> "Not ready"
+    | Pi (x, t, e) -> Printf.sprintf "Pi %s:%s. %s" (print_var x) (pprint t) (pprint e)
+    | Lambda (x, t, e) -> Printf.sprintf "\\%s:%s. %s" (print_var x) (pprint t) (pprint e)
+    | App (e1, e2) -> Printf.sprintf "(%s) (%s)" (pprint e1) (pprint e2)
+    | Unit -> "()"
+    | UnitType -> "Unit"
 
   (* SUBSTITUTION *)
 
