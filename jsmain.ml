@@ -19,7 +19,7 @@ let parse process input =
   let res = 
     try 
       process Lexer.main lexbuf
-    with Parser.Error -> (err "parse error")
+    with Parser.Error -> (error (Lexer.info lexbuf) "parse error")
   in
     res
     

@@ -57,24 +57,23 @@ let universe = ['U'] digit*
 
 
 (* The main body of the lexical analyzer *)
-
 rule main = parse
   whitespace+                       { main lexbuf }
 | whitespace*("\r")?"\n"            { main lexbuf }
-| universe as u                     { Universe (int_of_string (str_tail u)) }
-| "Pi"                              { PI }
-| "\\"                              { LAM }
-| "."                               { DOT }
-| ":"                               { COLON } 
-| "("                               { LPAREN }
-| ")"                               { RPAREN }
-| "["                               { LSQUARE }
-| "]"                               { RSQUARE }
-| ","                               { COMMA }
-| "Unit"                            { UnitType }
-| lident as var                     { Var var } 
-| uident as var                     { Var var }
-| eof                               { EOF }
-| _                                 { err "Illegal character found" }
+| universe as u                     { Universe {i=info lexbuf;v=(int_of_string (str_tail u))}  }
+| "Pi"                              { PI (info lexbuf) }
+| "\\"                              { LAM (info lexbuf) }
+| "."                               { DOT (info lexbuf) }
+| ":"                               { COLON (info lexbuf) } 
+| "("                               { LPAREN (info lexbuf) }
+| ")"                               { RPAREN (info lexbuf) }
+| "["                               { LSQUARE (info lexbuf) }
+| "]"                               { RSQUARE (info lexbuf) }
+| ","                               { COMMA (info lexbuf) }
+| "Unit"                            { UnitType (info lexbuf) }
+| lident as var                     { Var {i=info lexbuf;v=var} } 
+| uident as var                     { Var {i=info lexbuf;v=var} }
+| eof                               { EOF (info lexbuf) }
+| _                                 { error (info lexbuf) "Illegal character found" }
 
 (*  *)

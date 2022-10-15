@@ -5,25 +5,26 @@
 
 %{
 open Cc
+open Err.Error
 %}
 
 (* ---------------------------------------------------------------------- *)
 (* Preliminaries *)
 
-%token <string> Var
-%token <int> Universe
-%token UnitType
+%token <string Err.Error.withinfo> Var
+%token <int Err.Error.withinfo> Universe
+%token <Err.Error.info> UnitType
 
-%token COMMA
-%token COLON
-%token LAM
-%token DOT
-%token PI
-%token LPAREN
-%token RPAREN
-%token LSQUARE
-%token RSQUARE
-%token EOF
+%token <Err.Error.info> COMMA
+%token <Err.Error.info> COLON
+%token <Err.Error.info> LAM
+%token <Err.Error.info> DOT
+%token <Err.Error.info> PI
+%token <Err.Error.info> LPAREN
+%token <Err.Error.info> RPAREN
+%token <Err.Error.info> LSQUARE
+%token <Err.Error.info> RSQUARE
+%token <Err.Error.info> EOF
 
 (* ---------------------------------------------------------------------- *)
 
@@ -37,8 +38,8 @@ cc_expr:
 
 CCExpr: 
   | CCApp                                        { $1 }
-  | LAM x = Var COLON t = CCExpr DOT e = CCExpr  { CC.Lambda (CC.String x, t, e) }
-  | PI x = Var COLON t = CCExpr DOT e = CCExpr   { CC.Pi (CC.String x, t, e) }
+  | LAM x = Var COLON t = CCExpr DOT e = CCExpr  { CC.Lambda (CC.String x.v, t, e) }
+  | PI x = Var COLON t = CCExpr DOT e = CCExpr   { CC.Pi (CC.String x.v, t, e) }
 
 CCApp:
   | CCAtomic                                     { $1 }
@@ -48,8 +49,8 @@ CCAtomic:
   | LPAREN CCExpr RPAREN                         { $2 }
   | LPAREN RPAREN                                { CC.Unit }
   | UnitType                                     { CC.UnitType }
-  | Universe                                     { CC.Universe $1 }
-  | Var                                          { CC.Var (CC.String $1) }
+  | Universe                                     { CC.Universe $1.v }
+  | Var                                          { CC.Var (CC.String $1.v) }
 
 cc_env:
   | CCEnv EOF { List.rev $1 }
@@ -59,7 +60,7 @@ CCEnv:
   | LSQUARE CCEnvList RSQUARE {$2}
 
 CCEnvList:
-  | Var COLON CCExpr {[(CC.String $1, $3)]}
-  | Var COLON CCExpr COMMA CCEnvList {(CC.String $1, $3) :: $5}
+  | Var COLON CCExpr {[(CC.String $1.v, $3)]}
+  | Var COLON CCExpr COMMA CCEnvList {(CC.String $1.v, $3) :: $5}
 
 (*   *)

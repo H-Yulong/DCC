@@ -37,8 +37,8 @@ let printInfo =
         print_string f;
         print_string ":";
       end;
-      print_int ls; print_string ".";
-      print_int cs; print_string "-";
+      print_string "Line "; print_int ls; print_string ",";
+      print_string "characters "; print_int cs; print_string "-";
       if le <> ls then
         (print_int le;prerr_string ".");
       print_int ce; print_string ":"
