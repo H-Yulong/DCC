@@ -35,13 +35,17 @@ function cc_check_button() {
     var env = "[" + envbox.value + "]";
 
     var result = cc_check(env, termbox.value, typebox.value);
-    console.log(result);
     if (result) {
     	cc_type.style.backgroundColor = "#B2FF66";
     } else {
     	cc_type.style.backgroundColor = "#FF6666";
     }
 
+}
+
+function cc_clear() {
+	document.getElementById("cc_type").value = "";
+	cc_type.style.backgroundColor = "white";
 }
 
 

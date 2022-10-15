@@ -4,7 +4,39 @@
 open Parser
 open Err.Error
 
+exception Error of string
+
 let str_tail str = String.sub str 1 (String.length str - 1)
+
+let lineno   = ref 1
+and start    = ref 0
+
+and filename = ref ""
+and startLex = ref dummyinfo
+
+(* To handle glyphs *)
+let curr_offset = ref 0
+
+let create inFile stream =
+  if not (Filename.is_implicit inFile) then filename := inFile
+  else filename := Filename.concat (Sys.getcwd()) inFile;
+  lineno := 1; start := 0; Lexing.from_channel stream
+
+let from_string s =
+  filename := ""; lineno := 1; start := 0;
+  Lexing.from_string s
+
+let newline lexbuf = incr lineno; curr_offset := 0; start := (Lexing.lexeme_start lexbuf)
+
+let info ?(offset = 0) lexbuf =
+  let r = !curr_offset - !start in
+  curr_offset := !curr_offset - offset;
+  createInfo (!filename)
+    (!lineno) (Lexing.lexeme_start lexbuf + r)
+    (!lineno) (Lexing.lexeme_end lexbuf + r - offset - 1)
+
+let text = Lexing.lexeme
+
 }
 
 let whitespace = [' ' '	']
@@ -29,19 +61,20 @@ let universe = ['U'] digit*
 rule main = parse
   whitespace+                       { main lexbuf }
 | whitespace*("\r")?"\n"            { main lexbuf }
-| universe as u                     { Parser.Universe (int_of_string (str_tail u)) }
-| "Pi"                              { Parser.PI }
-| "\\"                              { Parser.LAM }
-| "."                               { Parser.DOT }
-| ":"                               { Parser.COLON } 
-| "("                               { Parser.LPAREN }
-| ")"                               { Parser.RPAREN }
-| "["                               { Parser.LSQUARE }
-| "]"                               { Parser.RSQUARE }
-| ","                               { Parser.COMMA }
-| "Unit"                            { Parser.UnitType }
-| lident as var                     { Parser.Var var } 
-| uident as var                     { Parser.Var var }
-| eof { EOF }
+| universe as u                     { Universe (int_of_string (str_tail u)) }
+| "Pi"                              { PI }
+| "\\"                              { LAM }
+| "."                               { DOT }
+| ":"                               { COLON } 
+| "("                               { LPAREN }
+| ")"                               { RPAREN }
+| "["                               { LSQUARE }
+| "]"                               { RSQUARE }
+| ","                               { COMMA }
+| "Unit"                            { UnitType }
+| lident as var                     { Var var } 
+| uident as var                     { Var var }
+| eof                               { EOF }
+| _                                 { err "Illegal character found" }
 
 (*  *)

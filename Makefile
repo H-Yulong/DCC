@@ -12,12 +12,13 @@ YACC = menhir --explain --strict --reference-graph --infer
 COMPILEFLAGS = -g
 
 # File names
-INCLUDE = 
-DEPEND += lexer.ml parser.ml
-OBJECTS = err.cmo cc.cmo parser.cmo lexer.cmo 
+CORE = err.cmo cc.cmo
+GENERATE = parser.ml lexer.ml
+GENERATED_OBJECTS = parser.cmo lexer.cmo
 
-all: $(DEPEND) $(OBJECTS)
-	ocamlfind ocamlc -package js_of_ocaml -package js_of_ocaml-ppx -linkpkg -o jsmain.byte $(OBJECTS) jsmain.ml
+all: $(CORE) $(GENERATE) parser.cmi $(GENERATED_OBJECTS)
+	ocamlfind ocamlc -package js_of_ocaml -package js_of_ocaml-ppx -linkpkg \
+	-o jsmain.byte $(CORE) $(GENERATED_OBJECTS) jsmain.ml
 	js_of_ocaml jsmain.byte
 
 # Include an automatically generated list of dependencies between source files
@@ -44,7 +45,7 @@ parser.ml parser.mli: parser.mly
 	@chmod -w parser.ml parser.mli
 	
 # Rebuild intermodule dependencies
-depend:: $(DEPEND)
+depend:: $(CORE) $(GENERATE)
 	ocamldep $(INCLUDE) *.mli *.ml > .depend
 
 clean:: 

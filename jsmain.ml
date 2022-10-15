@@ -1,31 +1,57 @@
+open Format
 open Cc.CC
+open Err.Error
 open Js_of_ocaml
-open Err
 
-let cc_parse s =
-  let s = Js.to_string s in
+(* Set up output buffer and formamter *)
+let output_buffer = Buffer.create 100
+
+let print = Buffer.add_substring output_buffer
+let flush () = ()
+
+let () = set_formatter_output_functions print flush
+
+(* Function definitions *)
+
+let parse process input = 
+  let s = Js.to_string input in
   let lexbuf = Lexing.from_string s in
-  let ast = Parser.cc_expr Lexer.main lexbuf in
-    ast
-
-let cc_parse_env s = 
-  let s = Js.to_string s in
-  let lexbuf = Lexing.from_string s in
-  let ast = Parser.cc_env Lexer.main lexbuf in
-    ast
-
+  let res = 
+    try 
+      process Lexer.main lexbuf
+    with Parser.Error -> (err "parse error")
+  in
+    res
+    
 let cc_infer env term =
-  let env = cc_parse_env env in
-  let term = cc_parse term in
-    Js.string (pprint (infer_type env term))
+  let res = 
+    try 
+      Buffer.clear output_buffer;
+      let env = parse Parser.cc_env env in
+      let term = parse Parser.cc_expr term in
+      Js.Unsafe.set Js.Unsafe.global "fomega_status" 0;
+      pprint (infer_type env term)
+    with Exit status ->
+      Js.Unsafe.set Js.Unsafe.global "fomega_status" status;
+      Buffer.contents output_buffer
+  in
+    Js.string res
 
 let cc_check env term ty =
-  let env = cc_parse_env env in
-  let term = cc_parse term in
-  let ty = cc_parse ty in
-    Js.bool (type_check env term ty)
+  let res = 
+    try 
+      Buffer.clear output_buffer;
+      let env = parse Parser.cc_env env in
+      let term = parse Parser.cc_expr term in
+      let ty = parse Parser.cc_expr ty in
+      Js.Unsafe.set Js.Unsafe.global "fomega_status" 0;
+      type_check env term ty
+    with Exit status ->
+      Js.Unsafe.set Js.Unsafe.global "fomega_status" status;
+      false
+  in
+    Js.bool res
 
 let () = Js.Unsafe.set Js.Unsafe.global "cc_infer" (Js.wrap_callback cc_infer)
 let () = Js.Unsafe.set Js.Unsafe.global "cc_check" (Js.wrap_callback cc_check)
-
 
