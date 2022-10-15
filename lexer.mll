@@ -40,7 +40,8 @@ rule main = parse
 | "]"                               { Parser.RSQUARE }
 | ","                               { Parser.COMMA }
 | "Unit"                            { Parser.UnitType }
-| lident as var                     { Parser.Var (var) } 
+| lident as var                     { Parser.Var var } 
+| uident as var                     { Parser.Var var }
 | eof { EOF }
 
 (*  *)
