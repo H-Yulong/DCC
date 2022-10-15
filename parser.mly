@@ -52,7 +52,7 @@ CCAtomic:
   | Var                                          { CC.Var (CC.String $1) }
 
 cc_env:
-  | CCEnv EOF { $1 }
+  | CCEnv EOF { List.rev $1 }
 
 CCEnv:
   | LSQUARE RSQUARE {[]}

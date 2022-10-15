@@ -23,6 +23,7 @@ function cc_infer_button() {
     var env = "[" + envbox.value + "]";
 
     typebox.value = cc_infer(env, termbox.value);
+    cc_type.style.backgroundColor = "white";
 }
 
 function cc_check_button() {
