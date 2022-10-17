@@ -61,8 +61,13 @@ rule main = parse
   whitespace+                       { main lexbuf }
 | whitespace*("\r")?"\n"            { main lexbuf }
 | universe as u                     { Universe {i=info lexbuf;v=(int_of_string (str_tail u))}  }
-| "Pi"                              { PI (info lexbuf) }
+| "\\Pi"                            { PI (info lexbuf) }
+| "\206\160"                        { PI (info lexbuf) }
+| "Unit"                            { UnitType (info lexbuf) }
 | "\\"                              { LAM (info lexbuf) }
+| "\206\187"                        { LAM (info lexbuf) }
+| "\\lambda"                        { LAM (info lexbuf) }
+| "\\lam"                           { LAM (info lexbuf) }
 | "."                               { DOT (info lexbuf) }
 | ":"                               { COLON (info lexbuf) } 
 | "("                               { LPAREN (info lexbuf) }
@@ -70,7 +75,6 @@ rule main = parse
 | "["                               { LSQUARE (info lexbuf) }
 | "]"                               { RSQUARE (info lexbuf) }
 | ","                               { COMMA (info lexbuf) }
-| "Unit"                            { UnitType (info lexbuf) }
 | lident as var                     { Var {i=info lexbuf;v=var} } 
 | uident as var                     { Var {i=info lexbuf;v=var} }
 | eof                               { EOF (info lexbuf) }

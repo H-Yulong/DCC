@@ -42,8 +42,8 @@ module CC = struct
   let rec pprint = function
     | Var x -> print_var x
     | Universe i -> "U" ^ (string_of_int i)
-    | Pi (x, t, e) -> Printf.sprintf "Pi %s:%s. %s" (print_var x) (pprint t) (pprint e)
-    | Lambda (x, t, e) -> Printf.sprintf "\\%s:%s. %s" (print_var x) (pprint t) (pprint e)
+    | Pi (x, t, e) -> Printf.sprintf "\206\160%s:%s. %s" (print_var x) (pprint t) (pprint e)
+    | Lambda (x, t, e) -> Printf.sprintf "\206\187%s:%s. %s" (print_var x) (pprint t) (pprint e)
     | App (e1, e2) -> Printf.sprintf "(%s) (%s)" (pprint e1) (pprint e2)
     | Unit -> "()"
     | UnitType -> "Unit"
