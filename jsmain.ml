@@ -54,21 +54,34 @@ let cc_check env term ty =
   in
     Js.bool res
 
-(* let transform env term ty = 
+let dcc_infer term =
   let res = 
     try 
       Buffer.clear output_buffer;
-      let env = parse Parser.cc_env env in
-      let term = parse Parser.cc_expr term in
-      let ty = parse Parser.cc_expr ty in
-      let (_, e, _) = transform_full env term ty in
+      let env = DCC.mk_ctx [] [] in
+      let term = parse Parser.dcc_expr term in
       Js.Unsafe.set Js.Unsafe.global "fomega_status" 0;
-      DCC.pprint e
+      DCC.pprint (DCC.infer_type env term)
     with Exit status ->
       Js.Unsafe.set Js.Unsafe.global "fomega_status" status;
       Buffer.contents output_buffer
   in
-    Js.string res *)
+    Js.string res
+
+let dcc_check term ty =
+  let res = 
+    try 
+      Buffer.clear output_buffer;
+      let env = DCC.mk_ctx [] [] in
+      let term = parse Parser.dcc_expr term in
+      let ty = parse Parser.dcc_expr ty in
+      Js.Unsafe.set Js.Unsafe.global "fomega_status" 0;
+      DCC.type_check env term ty
+    with Exit status ->
+      Js.Unsafe.set Js.Unsafe.global "fomega_status" status;
+      false
+  in
+    Js.bool res
 
 let transform env term ty = 
   let env = parse Parser.cc_env env in
@@ -83,6 +96,9 @@ let transform env term ty =
   )
 
 
-let () = Js.Unsafe.set Js.Unsafe.global "cc_infer" (Js.wrap_callback cc_infer)
-let () = Js.Unsafe.set Js.Unsafe.global "cc_check" (Js.wrap_callback cc_check)
-let () = Js.Unsafe.set Js.Unsafe.global "transform" (Js.wrap_callback transform)
+let () = 
+  Js.Unsafe.set Js.Unsafe.global "cc_infer" (Js.wrap_callback cc_infer);
+  Js.Unsafe.set Js.Unsafe.global "cc_check" (Js.wrap_callback cc_check);
+  Js.Unsafe.set Js.Unsafe.global "dcc_infer" (Js.wrap_callback dcc_infer);
+  Js.Unsafe.set Js.Unsafe.global "dcc_check" (Js.wrap_callback dcc_check);
+  Js.Unsafe.set Js.Unsafe.global "transform" (Js.wrap_callback transform)

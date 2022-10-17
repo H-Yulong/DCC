@@ -20,21 +20,25 @@ err.cmi :
 ex.cmo :
 ex.cmx :
 jsmain.cmo : \
+    transformation.cmi \
     parser.cmi \
     lexer.cmo \
     err.cmi \
     dcc.cmi \
     cc.cmi
 jsmain.cmx : \
+    transformation.cmx \
     parser.cmx \
     lexer.cmx \
     err.cmx \
     dcc.cmx \
     cc.cmx
 labelled_cc.cmo : \
+    err.cmi \
     cc.cmi \
     labelled_cc.cmi
 labelled_cc.cmx : \
+    err.cmx \
     cc.cmx \
     labelled_cc.cmi
 labelled_cc.cmi : \
@@ -47,22 +51,27 @@ lexer.cmx : \
     err.cmx
 parser.cmo : \
     err.cmi \
+    dcc.cmi \
     cc.cmi \
     parser.cmi
 parser.cmx : \
     err.cmx \
+    dcc.cmx \
     cc.cmx \
     parser.cmi
 parser.cmi : \
     err.cmi \
+    dcc.cmi \
     cc.cmi
 transformation.cmo : \
     labelled_cc.cmi \
+    err.cmi \
     dcc.cmi \
     cc.cmi \
     transformation.cmi
 transformation.cmx : \
     labelled_cc.cmx \
+    err.cmx \
     dcc.cmx \
     cc.cmx \
     transformation.cmi

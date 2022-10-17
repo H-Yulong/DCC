@@ -51,6 +51,40 @@ function cc_clear() {
 	cc_type.style.backgroundColor = "white";
 }
 
+function dcc_infer_button() {
+    var envbox = document.getElementById("dcc_env");
+    var termbox = document.getElementById("dcc_term");
+    var typebox = document.getElementById("dcc_type");
+
+    // Get context
+    var env = "[" + envbox.value + "]";
+
+    typebox.value = dcc_infer(termbox.value);
+    dcc_type.style.backgroundColor = "white";
+}
+
+function dcc_check_button() {
+    var envbox = document.getElementById("dcc_env");
+    var termbox = document.getElementById("dcc_term");
+    var typebox = document.getElementById("dcc_type");
+
+    // Get context
+    var env = "[" + envbox.value + "]";
+
+    var result = dcc_check(termbox.value, typebox.value);
+    if (result) {
+        dcc_type.style.backgroundColor = "#B2FF66";
+    } else {
+        dcc_type.style.backgroundColor = "#FF6666";
+    }
+
+}
+
+function dcc_clear() {
+    document.getElementById("dcc_type").value = "";
+    cc_type.style.backgroundColor = "white";
+}
+
 function to_dcc() {
     var envbox = document.getElementById("cc_env");
     var termbox = document.getElementById("cc_term");

@@ -5,6 +5,7 @@
 
 %{
 open Cc
+open Dcc
 open Err.Error
 %}
 
@@ -28,9 +29,10 @@ open Err.Error
 
 (* ---------------------------------------------------------------------- *)
 
-%start cc_expr cc_env
+%start cc_expr cc_env dcc_expr
 %type <CC.expr> cc_expr
 %type <CC.context> cc_env
+%type <DCC.expr> dcc_expr
 %%
 
 cc_expr:
@@ -38,8 +40,8 @@ cc_expr:
 
 CCExpr: 
   | CCApp                                        { $1 }
-  | LAM x = Var COLON t = CCExpr DOT e = CCExpr  { CC.Lambda (CC.String x.v, t, e) }
-  | PI x = Var COLON t = CCExpr DOT e = CCExpr   { CC.Pi (CC.String x.v, t, e) }
+  | LAM Var COLON CCExpr DOT CCExpr              { CC.Lambda (CC.String $2.v, $4, $6) }
+  | PI Var COLON CCExpr DOT CCExpr               { CC.Pi (CC.String $2.v, $4, $6) }
 
 CCApp:
   | CCAtomic                                     { $1 }
@@ -53,14 +55,31 @@ CCAtomic:
   | Var                                          { CC.Var (CC.String $1.v) }
 
 cc_env:
-  | CCEnv EOF { List.rev $1 }
+  | CCEnv EOF                                    { List.rev $1 }
 
 CCEnv:
-  | LSQUARE RSQUARE {[]}
-  | LSQUARE CCEnvList RSQUARE {$2}
+  | LSQUARE RSQUARE                              { [] }
+  | LSQUARE CCEnvList RSQUARE                    { $2 }
 
 CCEnvList:
-  | Var COLON CCExpr {[(CC.String $1.v, $3)]}
-  | Var COLON CCExpr COMMA CCEnvList {(CC.String $1.v, $3) :: $5}
+  | Var COLON CCExpr                             { [(CC.String $1.v, $3)] }
+  | Var COLON CCExpr COMMA CCEnvList             { (CC.String $1.v, $3) :: $5 }
 
-(*   *)
+dcc_expr:
+  | DCCExpr EOF                                  { $1 }
+
+DCCExpr:
+  | DCCApp                                       { $1 }
+  | PI Var COLON DCCExpr DOT DCCExpr             { DCC.Pi (DCC.String $2.v, $4, $6) }
+
+DCCApp:
+  | DCCAtomic                                    { $1 }
+  | DCCApp DCCAtomic                             { DCC.Apply ($1, $2) }
+
+DCCAtomic: 
+  | LPAREN DCCExpr RPAREN                        { $2 }
+  | LPAREN RPAREN                                { DCC.Unit }
+  | UnitType                                     { DCC.UnitType }
+  | Universe                                     { DCC.Universe $1.v }
+  | Var                                          { DCC.Var (DCC.String $1.v) }
+
