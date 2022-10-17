@@ -11,6 +11,9 @@
 		<h1> DCC here. </h1>
 		<table style="width: 100%">
 			<tr>
+				<td colspan=3> Source Language (CC)
+			</tr>
+			<tr>
 				<td> Context </td>
 				<td><textarea style="width: 95%;" id="cc_env"></textarea></td>
 				<td><button> Click </button></td>
@@ -18,13 +21,40 @@
 			<tr>
 				<td> Term </td>
 				<td><textarea style="width: 95%;" id="cc_term"></textarea></td>
-				<td><button onclick="cc_infer_button()"> Infer type </button></td>
-				<td><button onclick="cc_check_button()"> Type check </button></td>
+				<td>
+					<button onclick="cc_infer_button()"> Infer type </button>
+					<button onclick="cc_check_button()"> Type check </button>
+					<button onclick="to_dcc()"> Transform to DCC </button>
+				</td>
 			</tr>
 			<tr>
 				<td> Type </td>
 				<td><textarea style="width: 95%;" id="cc_type"></textarea></td>
 				<td><button onclick="cc_clear()"> Clear </button></td>
+			</tr>
+		</table>
+		<table style="width: 100%">
+			<tr>
+				<td colspan=3> Target Language (CC)
+			</tr>
+			<tr>
+				<td> Context </td>
+				<td><textarea style="width: 95%;" id="dcc_env"></textarea></td>
+				<td><button> Click </button></td>
+			</tr>
+			<tr>
+				<td> Term </td>
+				<td><textarea style="width: 95%;" id="dcc_term"></textarea></td>
+				<td>
+					<button onclick="dcc_infer_button()"> Infer type </button>
+					<button onclick="dcc_check_button()"> Type check </button>
+					<button onclick="to_cc()"> Transform to CC </button>
+				</td>
+			</tr>
+			<tr>
+				<td> Type </td>
+				<td><textarea style="width: 95%;" id="dcc_type"></textarea></td>
+				<td><button onclick="dcc_clear()"> Clear </button></td>
 			</tr>
 		</table>
 	</body>
