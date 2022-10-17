@@ -54,29 +54,33 @@ let cc_check env term ty =
   in
     Js.bool res
 
-let dcc_infer term =
+let dcc_infer defs env term =
   let res = 
     try 
       Buffer.clear output_buffer;
-      let env = DCC.mk_ctx [] [] in
+      let defs = parse Parser.dcc_lab_env defs in
+      let env = parse Parser.dcc_env env in
       let term = parse Parser.dcc_expr term in
+      let context = DCC.mk_ctx defs env in
       Js.Unsafe.set Js.Unsafe.global "fomega_status" 0;
-      DCC.pprint (DCC.infer_type env term)
+      DCC.pprint (DCC.infer_type context term)
     with Exit status ->
       Js.Unsafe.set Js.Unsafe.global "fomega_status" status;
       Buffer.contents output_buffer
   in
     Js.string res
 
-let dcc_check term ty =
+let dcc_check defs env term ty =
   let res = 
     try 
       Buffer.clear output_buffer;
-      let env = DCC.mk_ctx [] [] in
+      let defs = parse Parser.dcc_lab_env defs in
+      let env = parse Parser.dcc_env env in
       let term = parse Parser.dcc_expr term in
       let ty = parse Parser.dcc_expr ty in
+      let context = DCC.mk_ctx defs env in
       Js.Unsafe.set Js.Unsafe.global "fomega_status" 0;
-      DCC.type_check env term ty
+      DCC.type_check context term ty
     with Exit status ->
       Js.Unsafe.set Js.Unsafe.global "fomega_status" status;
       false

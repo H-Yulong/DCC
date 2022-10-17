@@ -16,8 +16,10 @@ open Err.Error
 %token <int Err.Error.withinfo> Universe
 %token <Err.Error.info> UnitType
 
+%token <Err.Error.info> ARROW
 %token <Err.Error.info> COMMA
 %token <Err.Error.info> COLON
+%token <Err.Error.info> SEMICOLON
 %token <Err.Error.info> LAM
 %token <Err.Error.info> DOT
 %token <Err.Error.info> PI
@@ -25,14 +27,18 @@ open Err.Error
 %token <Err.Error.info> RPAREN
 %token <Err.Error.info> LSQUARE
 %token <Err.Error.info> RSQUARE
+%token <Err.Error.info> LBRACE
+%token <Err.Error.info> RBRACE
 %token <Err.Error.info> EOF
 
 (* ---------------------------------------------------------------------- *)
 
-%start cc_expr cc_env dcc_expr
+%start cc_expr cc_env dcc_expr dcc_env dcc_lab_env
 %type <CC.expr> cc_expr
 %type <CC.context> cc_env
 %type <DCC.expr> dcc_expr
+%type <(DCC.variable * DCC.expr) list> dcc_env
+%type <(DCC.label * DCC.defItem) list> dcc_lab_env
 %%
 
 cc_expr:
@@ -70,7 +76,13 @@ dcc_expr:
 
 DCCExpr:
   | DCCApp                                       { $1 }
+  | Var LBRACE RBRACE                            { DCC.Label (DCC.Lab $1.v, []) }
+  | Var LBRACE DCCExprList RBRACE                { DCC.Label (DCC.Lab $1.v, $3) }
   | PI Var COLON DCCExpr DOT DCCExpr             { DCC.Pi (DCC.String $2.v, $4, $6) }
+
+DCCExprList:
+  | DCCExpr                                      { [$1] }
+  | DCCExpr COMMA DCCExprList                    { $1 :: $3 }
 
 DCCApp:
   | DCCAtomic                                    { $1 }
@@ -83,3 +95,32 @@ DCCAtomic:
   | Universe                                     { DCC.Universe $1.v }
   | Var                                          { DCC.Var (DCC.String $1.v) }
 
+dcc_env:
+  | DCCEnv EOF                                   { List.rev $1 }
+
+DCCEnv:
+  | LSQUARE RSQUARE                              { [] }
+  | LSQUARE DCCEnvList RSQUARE                   { $2 }
+
+DCCEnvList:
+  | Var COLON DCCExpr                            { [(DCC.String $1.v, $3)] }
+  | Var COLON DCCExpr COMMA DCCEnvList           { (DCC.String $1.v, $3) :: $5 }
+
+dcc_lab_env:
+  | DCCLabEnv EOF                                { List.rev $1 }
+
+DCCLabEnv:
+  | LSQUARE RSQUARE                              { [] }
+  | LSQUARE DCCLabEnvList RSQUARE                { $2 }
+
+DCCLabEnvList:
+  | Var LPAREN DCCDefItem RPAREN                               
+  { [(DCC.Lab $1.v, $3)] }
+  | Var LPAREN DCCDefItem RPAREN COMMA DCCLabEnvList
+  { (DCC.Lab $1.v, $3) :: $6 }
+
+DCCDefItem:
+  | Var COLON DCCExpr ARROW DCCExpr COLON DCCExpr                   
+  { DCC.mk_def [] (DCC.String $1.v) $3 $7 $5 }
+  | DCCEnvList SEMICOLON Var COLON DCCExpr ARROW DCCExpr COLON DCCExpr 
+  { DCC.mk_def (List.rev $1) (DCC.String $3.v) $5 $9 $7 }

@@ -93,7 +93,7 @@ module DCC = struct
 	   	(pprint d.expr)
 	   	(pprint d.cod)
    	else
-	   	Printf.sprintf "(%s, %s:%s \226\134\146 %s:%s)" 
+	   	Printf.sprintf "(%s; %s:%s \226\134\146 %s:%s)" 
 	   	(print_env d.fvs)
 	   	(print_var d.var)
 	   	(pprint d.dom)
@@ -103,7 +103,7 @@ module DCC = struct
    let rec print_lab_env = function 
    	| [] -> ""
    	| (l, d) :: [] -> (print_lab l) ^ (print_lab_def d)
-   	| (l, d) :: (e2 :: es) -> (print_lab l) ^ (print_lab_def d) ^ "\n" ^ (print_lab_env (e2 :: es))
+   	| (l, d) :: (e2 :: es) -> (print_lab l) ^ (print_lab_def d) ^ ",\n" ^ (print_lab_env (e2 :: es))
 
 
 	(* SUBSTITUTION *)
@@ -219,7 +219,9 @@ module DCC = struct
 	   So, this set of rules are a bit different from standard definitions.
 	*)
 	let rec infer_type_fast ctx = function 
-		| Var x -> lookup_var x ctx 
+		| Var x -> (
+				try lookup_var x ctx
+        with Not_found -> (err ("Unbound variable: " ^ (print_var x))))
 		| Universe k -> Universe (k + 1)
 		| Label (l, es) -> infer_label ctx (l, es)
 		| Apply (e1, e2) -> 

@@ -52,26 +52,30 @@ function cc_clear() {
 }
 
 function dcc_infer_button() {
+    var labbox = document.getElementById("dcc_lab_env");
     var envbox = document.getElementById("dcc_env");
     var termbox = document.getElementById("dcc_term");
     var typebox = document.getElementById("dcc_type");
 
     // Get context
     var env = "[" + envbox.value + "]";
+    var defs = "[" + labbox.value + "]";
 
-    typebox.value = dcc_infer(termbox.value);
+    typebox.value = dcc_infer(defs, env, termbox.value);
     dcc_type.style.backgroundColor = "white";
 }
 
 function dcc_check_button() {
+    var labbox = document.getElementById("dcc_lab_env");
     var envbox = document.getElementById("dcc_env");
     var termbox = document.getElementById("dcc_term");
     var typebox = document.getElementById("dcc_type");
 
     // Get context
     var env = "[" + envbox.value + "]";
+    var defs = "[" + labbox.value + "]";
 
-    var result = dcc_check(termbox.value, typebox.value);
+    var result = dcc_check(defs, env, termbox.value, typebox.value);
     if (result) {
         dcc_type.style.backgroundColor = "#B2FF66";
     } else {
@@ -82,7 +86,7 @@ function dcc_check_button() {
 
 function dcc_clear() {
     document.getElementById("dcc_type").value = "";
-    cc_type.style.backgroundColor = "white";
+    dcc_type.style.backgroundColor = "white";
 }
 
 function to_dcc() {

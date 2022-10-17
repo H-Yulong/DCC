@@ -62,18 +62,24 @@ rule main = parse
 | whitespace*("\r")?"\n"            { main lexbuf }
 | universe as u                     { Universe {i=info lexbuf;v=(int_of_string (str_tail u))}  }
 | "\\Pi"                            { PI (info lexbuf) }
+| "Pi"                              { PI (info lexbuf) }
 | "\206\160"                        { PI (info lexbuf) }
-| "Unit"                            { UnitType (info lexbuf) }
 | "\\"                              { LAM (info lexbuf) }
 | "\206\187"                        { LAM (info lexbuf) }
 | "\\lambda"                        { LAM (info lexbuf) }
 | "\\lam"                           { LAM (info lexbuf) }
+| "Unit"                            { UnitType (info lexbuf) }
+| "->"                              { ARROW (info lexbuf) }
+| "\226\134\146"                    { ARROW (info lexbuf) }
 | "."                               { DOT (info lexbuf) }
 | ":"                               { COLON (info lexbuf) } 
+| ";"                               { SEMICOLON (info lexbuf) } 
 | "("                               { LPAREN (info lexbuf) }
 | ")"                               { RPAREN (info lexbuf) }
 | "["                               { LSQUARE (info lexbuf) }
 | "]"                               { RSQUARE (info lexbuf) }
+| "{"                               { LBRACE (info lexbuf) }
+| "}"                               { RBRACE (info lexbuf) }
 | ","                               { COMMA (info lexbuf) }
 | lident as var                     { Var {i=info lexbuf;v=var} } 
 | uident as var                     { Var {i=info lexbuf;v=var} }
