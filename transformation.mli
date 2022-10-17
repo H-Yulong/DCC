@@ -1,6 +1,6 @@
 open Cc
-open Labelled_cc
 open Dcc
+open Labelled_cc
 
 val transform_var : CC.variable -> DCC.variable
 val transform_lab_var : LCC.variable -> DCC.variable

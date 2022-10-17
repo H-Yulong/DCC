@@ -1,6 +1,5 @@
 module LCC :
   sig
-    exception Error of string
     type variable = String of string | Gensym of string * int
     type expr =
         Var of variable

@@ -12,7 +12,7 @@ YACC = menhir --explain --strict --reference-graph --infer
 COMPILEFLAGS = -g
 
 # File names
-CORE = err.cmo cc.cmo
+CORE = err.cmo cc.cmo labelled_cc.cmo dcc.cmo transformation.cmo
 GENERATE = parser.ml lexer.ml
 GENERATED_OBJECTS = parser.cmo lexer.cmo
 

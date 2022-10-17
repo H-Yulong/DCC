@@ -4,10 +4,11 @@
    with infinite universe hierarchy and unit type.
 *)
 
+open Err.Error
+
 module DCC = struct 
 
 	(* SYNTAX *)
-	exception Error of string
 
 	type variable = 
 		| String of string 
@@ -56,6 +57,54 @@ module DCC = struct
 	let extend_def l d ctx = {def = (l, d) :: ctx.def; con = ctx.con}
 	let extend_var x t ctx = {def = ctx.def; con = (x, t) :: ctx.con}
 
+	(* Pretty printing *)
+	let print_var = function
+   	| String s -> s
+   	| Gensym (s, _) -> s
+
+   let print_lab = function
+   	| Lab s -> s
+   	| Labsym (s, i) -> s ^ (string_of_int i)
+
+	let rec pprint = function
+		| Var x -> print_var x
+		| Universe i -> "U" ^ (string_of_int i)
+		| Pi (x, t, e) -> Printf.sprintf "\206\160%s:%s. %s" (print_var x) (pprint t) (pprint e)
+		| Apply (e1, e2) -> Printf.sprintf "(%s) (%s)" (pprint e1) (pprint e2)
+		| Label (lab, es) -> Printf.sprintf "%s{%s}" (print_lab lab) (pprint_list es)
+		| Unit -> "()"
+    	| UnitType -> "Unit"
+
+   and pprint_list = function
+   	| [] -> ""
+   	| e :: [] -> pprint e
+   	| e1 :: (e2 :: es) -> Printf.sprintf "%s, %s" (pprint e1) (pprint_list (e2 :: es))
+
+   let rec print_env = function 
+   	| [] -> ""
+   	| (x, e) :: [] -> Printf.sprintf "%s: %s" (print_var x) (pprint e)
+   	| (x, e) :: (e2 :: es) -> Printf.sprintf "%s: %s, %s" (print_var x) (pprint e) (print_env (e2 :: es))
+
+   let print_lab_def d =
+   	if d.fvs == [] then
+	   	Printf.sprintf "(%s:%s \226\134\146 %s:%s)" 
+	   	(print_var d.var)
+	   	(pprint d.dom)
+	   	(pprint d.expr)
+	   	(pprint d.cod)
+   	else
+	   	Printf.sprintf "(%s, %s:%s \226\134\146 %s:%s)" 
+	   	(print_env d.fvs)
+	   	(print_var d.var)
+	   	(pprint d.dom)
+	   	(pprint d.expr)
+	   	(pprint d.cod)
+
+   let rec print_lab_env = function 
+   	| [] -> ""
+   	| (l, d) :: [] -> (print_lab l) ^ (print_lab_def d)
+   	| (l, d) :: (e2 :: es) -> (print_lab l) ^ (print_lab_def d) ^ "\n" ^ (print_lab_env (e2 :: es))
+
 
 	(* SUBSTITUTION *)
 	let refresh =
@@ -86,7 +135,7 @@ module DCC = struct
 		match fvs, es with
 		| [], [] -> []
 		| ((x, _) :: xs , e :: es) -> (x, e) :: apply_prep xs es
-		| [], _ | _, [] -> raise (Error "Wrong number of free variables applied")
+		| [], _ | _, [] -> (err "Wrong number of free variables applied")
 
 	let rec normalize ctx = function
 		| Var x -> Var x
@@ -100,7 +149,7 @@ module DCC = struct
 							let d = lookup_def l ctx in
 							let s = (d.var, e2) :: apply_prep d.fvs es in
 								normalize ctx (subst s d.expr)
-						with Not_found -> raise (Error "Label not found"))
+						with Not_found -> (err "Label not found"))
 					| e1 -> Apply (e1, e2))
 		| Pi (x, t, e) -> Pi (x, normalize ctx t, normalize (extend_var x t ctx) e)
 		| Unit -> Unit
@@ -138,7 +187,7 @@ module DCC = struct
 				let d = lookup_def l ctx in
 				let sub = apply_prep d.fvs es in
 					equal (subst_normal ctx sub d.expr) (normalize (extend_var d.var (subst_normal ctx sub d.dom) ctx) (Apply(e2, Var d.var)))
-			with Not_found -> raise (Error "Label not found")
+			with Not_found -> (err "Label not found")
 		in
 			equal (normalize ctx e1) (normalize ctx e2)
 
@@ -146,7 +195,7 @@ module DCC = struct
 	(* TYPE INFERENCE *)
 	let check_equal ctx e1 e2 = 
 		if not (equal ctx e1 e2)
-		then raise (Error "Argument type does not match")
+		then (err "Argument type does not match")
 
 	(* This is a helper function for type-checking label terms. 
 
@@ -160,9 +209,9 @@ module DCC = struct
 		match ts, fvs with
 			| [], [] -> ()
 			| (e, t) :: ts, (x, tx) :: fvs -> 
-				if not (equal ctx t tx) then raise (Error "Free-variable type does not match"); 
+				if not (equal ctx t tx) then (err "Free-variable type does not match"); 
 				check_equal_list ctx ts (List.map (fun (y, ty) -> (y, subst [(x, e)] ty)) fvs)
-			| [], _ | _, [] -> raise (Error "Wrong number of free variables applied") 
+			| [], _ | _, [] -> (err "Wrong number of free variables applied") 
 
 	(* The type-inference algorithm.
 	   For efficiency, checking of context well-formedness is defined as a separate process.
@@ -189,13 +238,13 @@ module DCC = struct
 		let t = infer_type_fast ctx e in
 		match normalize ctx t with
 			| Universe k -> k
-			| Var _ | Label _ | Apply _ | Pi _ | Unit | UnitType -> raise (Error "Not a universe")
+			| Var _ | Label _ | Apply _ | Pi _ | Unit | UnitType -> (err "Not a universe")
 
 	and infer_pi ctx e = 
 		let t = infer_type_fast ctx e in
 		match normalize ctx t with
 			| Pi (x, s, t) -> (x, s, t)
-			| Var _ | Universe _ | Label _ | Apply _ | Unit | UnitType -> raise (Error "Not a pi-type")
+			| Var _ | Universe _ | Label _ | Apply _ | Unit | UnitType -> (err "Not a pi-type")
 
 	and infer_label ctx (l, es) =
 		try  
@@ -205,8 +254,7 @@ module DCC = struct
 				let sub = apply_prep d.fvs es in
 					Pi (d.var, (subst sub d.dom), (subst sub d.cod))
 		with
-			| Not_found -> raise (Error "Label not found")
-			| Error msg -> raise (Error msg)
+			| Not_found -> (err "Label not found")
 
 	(* [infer_fvs [(x1, t1), ..., (xn, tn)] checks if t1, ..., tn are types under context ctx.
 	   It returns () if everything is checked.
@@ -238,18 +286,14 @@ module DCC = struct
 			wf ctx.con
 
 	let infer_type ctx e = 
-		try
-			let _ = well_formed ctx in 
-				infer_type_fast ctx e
-		with Error msg -> raise (Error msg)
+		well_formed ctx; 
+		infer_type_fast ctx e
 		
 	(* TYPE CHECKING *)
 	(* Infer type, check if the given type expression equals to the inferred type.*)
 	let type_check ctx e t = 
-	    try 
-	      let _ = infer_universe ctx t in
-	      let te = infer_type ctx e in
-	      let t' = normalize ctx t in
-	        equal ctx te t'
-	    with Error msg -> raise (Error msg)
+      let _ = infer_universe ctx t in
+      let te = infer_type ctx e in
+      let t' = normalize ctx t in
+        equal ctx te t'
 end;;

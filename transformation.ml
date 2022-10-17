@@ -1,10 +1,11 @@
 (* #use "transformation.ml";; *)
 
+open Err.Error
 open Cc
 open Labelled_cc
-open Dcc
+open Dcc.DCC
 
-open DCC
+
 
 (* [transform_var x] turns a variable in CC to a variable in DCC *)
 let transform_var = function
@@ -62,7 +63,7 @@ let rec transform_lab ctx = function
 	| LCC.Pi (x, t, e) -> Pi (transform_lab_var x, transform_lab ctx t, transform_lab ((x,t) :: ctx) e)
 	| LCC.Lambda ((x, t, e), c) -> 
 		let fvs = List.map (fun x -> Var (transform_lab_var x)) (fv ctx (LCC.Lambda ((x, t, e), c)))
-		in Label(Labsym("_", c), fvs) 
+		in Label(Labsym("L", c), fvs) 
 	| LCC.App (e1, e2) -> Apply (transform_lab ctx e1, transform_lab ctx e2)
 	| LCC.UnitType -> UnitType
 	| LCC.Unit -> Unit
@@ -96,9 +97,9 @@ let rec def_lab_full ctx e ty = match e, ty with
 		let t' = transform_lab ctx t in
 		let te' = transform_lab ctx' te in
 		let e' = transform_lab ctx' e in
-					merge_defs ((Labsym("_", c), (mk_def fvs (transform_lab_var x) t' te' e')) :: (def_lab_full ctx t (Universe 0))) (def_lab_full ctx' e te)
+					merge_defs ((Labsym("L", c), (mk_def fvs (transform_lab_var x) t' te' e')) :: (def_lab_full ctx t (Universe 0))) (def_lab_full ctx' e te)
 
-	| _, _ -> raise (DCC.Error "Error in transformation!")
+	| _, _ -> (err "Error in transformation!")
 
 let def_lab ctx e = def_lab_full ctx e (LCC.infer_type ctx e)
 

@@ -1,6 +1,5 @@
 module DCC :
   sig
-    exception Error of string
     type variable = String of string | Gensym of string * int
     type label = Lab of string | Labsym of string * int
     type expr =
@@ -29,6 +28,13 @@ module DCC :
     val lookup_var : variable -> context -> expr
     val extend_def : label -> defItem -> context -> context
     val extend_var : variable -> expr -> context -> context
+    val print_var : variable -> string
+    val print_lab : label -> string
+    val pprint : expr -> string
+    val pprint_list : expr list -> string
+    val print_env : (variable * expr) list -> string
+    val print_lab_def : defItem -> string
+    val print_lab_env : (label * defItem) list -> string
     val refresh : variable -> variable
     val subst : (variable * expr) list -> expr -> expr
     val apply_prep : ('a * 'b) list -> 'c list -> ('a * 'c) list

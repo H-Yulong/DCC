@@ -1,5 +1,7 @@
 open Format
-open Cc.CC
+open Cc
+open Dcc
+open Transformation
 open Err.Error
 open Js_of_ocaml
 
@@ -30,7 +32,7 @@ let cc_infer env term =
       let env = parse Parser.cc_env env in
       let term = parse Parser.cc_expr term in
       Js.Unsafe.set Js.Unsafe.global "fomega_status" 0;
-      pprint (infer_type env term)
+      CC.pprint (CC.infer_type env term)
     with Exit status ->
       Js.Unsafe.set Js.Unsafe.global "fomega_status" status;
       Buffer.contents output_buffer
@@ -45,13 +47,42 @@ let cc_check env term ty =
       let term = parse Parser.cc_expr term in
       let ty = parse Parser.cc_expr ty in
       Js.Unsafe.set Js.Unsafe.global "fomega_status" 0;
-      type_check env term ty
+      CC.type_check env term ty
     with Exit status ->
       Js.Unsafe.set Js.Unsafe.global "fomega_status" status;
       false
   in
     Js.bool res
 
+(* let transform env term ty = 
+  let res = 
+    try 
+      Buffer.clear output_buffer;
+      let env = parse Parser.cc_env env in
+      let term = parse Parser.cc_expr term in
+      let ty = parse Parser.cc_expr ty in
+      let (_, e, _) = transform_full env term ty in
+      Js.Unsafe.set Js.Unsafe.global "fomega_status" 0;
+      DCC.pprint e
+    with Exit status ->
+      Js.Unsafe.set Js.Unsafe.global "fomega_status" status;
+      Buffer.contents output_buffer
+  in
+    Js.string res *)
+
+let transform env term ty = 
+  let env = parse Parser.cc_env env in
+  let term = parse Parser.cc_expr term in
+  let ty = parse Parser.cc_expr ty in
+  let (denv, de, dt) = transform_full env term ty in
+  (
+    Js.string (DCC.print_lab_env (List.rev denv.def)), 
+    Js.string (DCC.print_env (List.rev denv.con)),
+    Js.string (DCC.pprint de),
+    Js.string (DCC.pprint dt)
+  )
+
+
 let () = Js.Unsafe.set Js.Unsafe.global "cc_infer" (Js.wrap_callback cc_infer)
 let () = Js.Unsafe.set Js.Unsafe.global "cc_check" (Js.wrap_callback cc_check)
-
+let () = Js.Unsafe.set Js.Unsafe.global "transform" (Js.wrap_callback transform)

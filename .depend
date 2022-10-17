@@ -6,8 +6,10 @@ cc.cmx : \
     cc.cmi
 cc.cmi :
 dcc.cmo : \
+    err.cmi \
     dcc.cmi
 dcc.cmx : \
+    err.cmx \
     dcc.cmi
 dcc.cmi :
 err.cmo : \
@@ -18,14 +20,16 @@ err.cmi :
 ex.cmo :
 ex.cmx :
 jsmain.cmo : \
-    parser.cmo \
+    parser.cmi \
     lexer.cmo \
     err.cmi \
+    dcc.cmi \
     cc.cmi
 jsmain.cmx : \
     parser.cmx \
     lexer.cmx \
     err.cmx \
+    dcc.cmx \
     cc.cmx
 labelled_cc.cmo : \
     cc.cmi \
@@ -36,17 +40,22 @@ labelled_cc.cmx : \
 labelled_cc.cmi : \
     cc.cmi
 lexer.cmo : \
-    parser.cmo \
+    parser.cmi \
     err.cmi
 lexer.cmx : \
     parser.cmx \
     err.cmx
 parser.cmo : \
     err.cmi \
-    cc.cmi
+    cc.cmi \
+    parser.cmi
 parser.cmx : \
     err.cmx \
-    cc.cmx
+    cc.cmx \
+    parser.cmi
+parser.cmi : \
+    err.cmi \
+    cc.cmi
 transformation.cmo : \
     labelled_cc.cmi \
     dcc.cmi \

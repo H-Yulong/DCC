@@ -6,11 +6,11 @@
 *)
 
 open Cc
+open Err.Error
 
 module LCC = struct
 
   (* SYNTAX *)
-  exception Error of string
 
   (* Gensym for renaming variables; Dummy for pretty printing. *)
   type variable =
@@ -115,11 +115,8 @@ module LCC = struct
       (try 
          well_formed ctx; lookup_ty x ctx
          with 
-            | Not_found -> raise (Error "Undefined variable")
-            | Error _ -> raise (Error "Mal-formed context"))
-    | Universe k -> 
-      (try well_formed ctx; Universe (k + 1)
-       with Error _ -> raise (Error "Mal-formed context"))
+            | Not_found -> (err "Undefined variable"))
+    | Universe k -> well_formed ctx; Universe (k + 1)
     | Pi (x, t1, t2) ->
       let k1 = infer_universe ctx t1 in
       let k2 = infer_universe (extend x t1 ctx) t2 in
@@ -141,7 +138,7 @@ module LCC = struct
     let u = infer_type ctx t in
       match normalize ctx u with
         | Universe k -> k
-        | App _ | Var _ | Pi _ | Lambda _ | UnitType | Unit -> raise (Error "Not a universe")
+        | App _ | Var _ | Pi _ | Lambda _ | UnitType | Unit -> (err "Not a universe")
 
   (** [infer_pi ctx e] infers the type of [e] in context [ctx], verifies that it is
       of the form [Pi (x, t1, t2)] and returns the triple [(x, t1, t2)]. *)
@@ -149,12 +146,12 @@ module LCC = struct
     let t = infer_type ctx e in
       match normalize ctx t with
         | Pi a -> a
-        | Var _ | App _ | Universe _ | Lambda _ | UnitType | Unit -> raise (Error "Not a pi-type") 
+        | Var _ | App _ | Universe _ | Lambda _ | UnitType | Unit -> (err "Not a pi-type") 
 
   (** [check_equal ctx e1 e2] checks that expressions [e1] and [e2] are equal. *)
   and check_equal ctx e1 e2 =
     if not (equal ctx e1 e2)
-    then raise (Error "Argument type does not match")
+    then (err "Argument type does not match")
 
   and well_formed = function
     | [] -> ()
@@ -166,12 +163,10 @@ module LCC = struct
   (* TYPE CHECKING *)
   (* Infer type, check if the given type expression equals to the inferred type.*)
   let type_check ctx e t = 
-      try 
-        let _ = infer_universe ctx t in
-        let te = infer_type ctx e in
-        let t' = normalize ctx t in
-          equal ctx te t'
-      with Error msg -> raise (Error msg)
+    let _ = infer_universe ctx t in
+    let te = infer_type ctx e in
+    let t' = normalize ctx t in
+      equal ctx te t'
 
    let translate_var = function
    	| CC.String s -> String s

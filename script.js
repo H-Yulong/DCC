@@ -14,6 +14,9 @@
 // dcc_check: string*4 -> string
 // [dcc_check(type_env, label_env, term, type)]
 
+// We also have the transformation functions
+// transform: string*3 -> {env: string, term: string, type: string}
+
 function cc_infer_button() {
 	var envbox = document.getElementById("cc_env");
     var termbox = document.getElementById("cc_term");
@@ -46,6 +49,25 @@ function cc_check_button() {
 function cc_clear() {
 	document.getElementById("cc_type").value = "";
 	cc_type.style.backgroundColor = "white";
+}
+
+function to_dcc() {
+    var envbox = document.getElementById("cc_env");
+    var termbox = document.getElementById("cc_term");
+    var typebox = document.getElementById("cc_type");
+
+    var env = "[" + envbox.value + "]";
+    var type = typebox.value
+    if (type == "") {
+        type = cc_infer(env, termbox.value);
+    }
+
+    var result = transform(env, termbox.value, type);
+    document.getElementById("dcc_lab_env").value = result[1];
+    document.getElementById("dcc_env").value = result[2];
+    document.getElementById("dcc_term").value = result[3];
+    document.getElementById("dcc_type").value = result[4];
+
 }
 
 
