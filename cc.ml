@@ -48,6 +48,11 @@ module CC = struct
     | Unit -> "()"
     | UnitType -> "Unit"
 
+  let rec print_env = function
+    | [] -> ""
+    | (x, e) :: [] -> (print_var x) ^ ":" ^ (pprint e)
+    | (x, e) :: (e2 :: es) -> Printf.sprintf "%s:%s, %s" (print_var x) (pprint e) (print_env (e2 :: es))
+
   (* Implementation of the language *)
 
   (* SUBSTITUTION *)
