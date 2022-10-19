@@ -108,6 +108,7 @@ let rec def_ctx_lab = function
 	| (x, t) :: ctx -> (def_lab ctx t) @ (def_ctx_lab ctx)
 
 let check_type_preservation ctx e t = 
+	let _ = LCC.init () in
 	let ctx' = LCC.translate_ctx ctx in
 	let e' = LCC.translate e in
 	let t' = LCC.translate t in
@@ -115,6 +116,7 @@ let check_type_preservation ctx e t =
 		type_check (mk_ctx defs (transform_lab_ctx ctx')) (transform_lab ctx' e') (transform_lab ctx' t')
 
 let transform_full ctx e t = 
+	let _ = LCC.init () in
 	let ctx' = LCC.translate_ctx ctx in
 	let e' = LCC.translate e in
 	let t' = LCC.translate t in

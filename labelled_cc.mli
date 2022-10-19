@@ -14,7 +14,9 @@ module LCC :
     val lookup_ty : 'a -> ('a * 'b) list -> 'b
     val extend : 'a -> 'b -> ('a * 'b) list -> ('a * 'b) list
     val refresh : variable -> variable
+    val label_counter : int ref
     val refresh_label : unit -> int
+    val init : unit -> unit
     val subst : (variable * expr) list -> expr -> expr
     val subst_abstraction :
       (variable * expr) list -> abstraction -> abstraction

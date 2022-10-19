@@ -93,7 +93,7 @@ module DCC = struct
 	   	(pprint d.expr)
 	   	(pprint d.cod)
    	else
-	   	Printf.sprintf "(%s; %s:%s \226\134\146 %s:%s)" 
+	   	Printf.sprintf "(%s ; %s:%s \226\134\146 %s:%s)" 
 	   	(print_env d.fvs)
 	   	(print_var d.var)
 	   	(pprint d.dom)

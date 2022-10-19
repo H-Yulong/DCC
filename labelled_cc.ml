@@ -44,9 +44,11 @@ module LCC = struct
       function
         | String x | Gensym (x, _) -> (incr k ; Gensym (x, !k))
 
-  let refresh_label = 
-      let k = ref (-1) in 
-        (fun () -> (incr k); !k)  
+  let label_counter = ref (-1)
+
+  let refresh_label () = (incr label_counter); !label_counter 
+
+  let init () = label_counter := -1
 
   (** [subst [(x1,e1); ...; (xn;en)] e] performs the given substitution of
       expressions [e1], ..., [en] for variables [x1], ..., [xn] in expression [e]. *)
