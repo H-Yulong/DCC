@@ -82,8 +82,8 @@ module DCC = struct
 
    let rec print_env = function 
    	| [] -> ""
-   	| (x, e) :: [] -> Printf.sprintf "%s: %s" (print_var x) (pprint e)
-   	| (x, e) :: (e2 :: es) -> Printf.sprintf "%s: %s, %s" (print_var x) (pprint e) (print_env (e2 :: es))
+   	| (x, e) :: [] -> Printf.sprintf "%s:%s" (print_var x) (pprint e)
+   	| (x, e) :: (e2 :: es) -> Printf.sprintf "%s:%s, %s" (print_var x) (pprint e) (print_env (e2 :: es))
 
    let print_lab_def d =
    	if d.fvs == [] then
