@@ -123,4 +123,4 @@ DCCDefItem:
   | Var COLON DCCExpr ARROW DCCExpr COLON DCCExpr                   
   { DCC.mk_def [] (DCC.String $1.v) $3 $7 $5 }
   | DCCEnvList SEMICOLON Var COLON DCCExpr ARROW DCCExpr COLON DCCExpr 
-  { DCC.mk_def (List.rev $1) (DCC.String $3.v) $5 $9 $7 }
+  { DCC.mk_def $1 (DCC.String $3.v) $5 $9 $7 }
