@@ -31,6 +31,7 @@ module DCC :
     val print_var : variable -> string
     val print_lab : label -> string
     val pprint : expr -> string
+    val print_paren : expr -> string
     val pprint_list : expr list -> string
     val print_env : (variable * expr) list -> string
     val print_lab_def : defItem -> string

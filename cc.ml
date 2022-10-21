@@ -38,15 +38,23 @@ module CC = struct
     | String s -> s
     | Gensym (s, _) -> s
 
+
   (* Pretty-printing *)
   let rec pprint = function
     | Var x -> print_var x
     | Universe i -> "U" ^ (string_of_int i)
-    | Pi (x, t, e) -> Printf.sprintf "\206\160%s:%s. %s" (print_var x) (pprint t) (pprint e)
+    | Pi (x, t, e) -> Printf.sprintf "\206\160%s:%s.%s" (print_var x) (print_paren t) (pprint e)
     | Lambda (x, t, e) -> Printf.sprintf "\206\187%s:%s. %s" (print_var x) (pprint t) (pprint e)
-    | App (e1, e2) -> Printf.sprintf "(%s) (%s)" (pprint e1) (pprint e2)
+    | App (e1, e2) -> Printf.sprintf "%s %s" (print_paren e1) (print_paren e2)
     | Unit -> "()"
     | UnitType -> "Unit"
+  
+  (* For wrapping parenthesis resonably *)
+  and print_paren exp = match exp with
+    | Lambda (x, t, e) -> Printf.sprintf "(\206\187%s:%s. %s)" (print_var x) (pprint t) (pprint e)
+    | App (e1, e2) -> Printf.sprintf "(%s %s)" (print_paren e1) (print_paren e2)
+    | Pi es -> "(" ^ pprint (Pi es) ^ ")"
+    | _ -> pprint exp
 
   let rec print_env = function
     | [] -> ""

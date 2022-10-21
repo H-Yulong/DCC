@@ -15,6 +15,7 @@ module CC :
     val extend : 'a -> 'b -> ('a * 'b) list -> ('a * 'b) list
     val print_var : variable -> string
     val pprint : expr -> string
+    val print_paren : expr -> string
     val print_env : (variable * expr) list -> string
     val refresh : variable -> variable
     val subst : (variable * expr) list -> expr -> expr
