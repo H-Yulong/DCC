@@ -15,7 +15,7 @@
 // [dcc_check(type_env, label_env, term, type)]
 
 // We also have the transformation functions
-// transform: string*3 -> {env: string, term: string, type: string}
+// transform: string*3 -> {defs, env, type, term, err : string}
 
 const RED = "#FF6666"
 const GREEN = "#B2FF66" 
@@ -113,10 +113,22 @@ function to_dcc() {
     }
 
     var result = transform(env, termbox.value, type);
-    document.getElementById("dcc_lab_env").value = result[1];
-    document.getElementById("dcc_env").value = result[2];
-    document.getElementById("dcc_term").value = result[3];
-    document.getElementById("dcc_type").value = result[4];
+
+
+    if (dcc_status == 0) {
+        dcc_type.style.backgroundColor = "white";
+        document.getElementById("dcc_lab_env").value = result[1];
+        document.getElementById("dcc_env").value = result[2];
+        document.getElementById("dcc_term").value = result[3];
+        document.getElementById("dcc_type").value = result[4];
+    } else {
+        dcc_type.style.backgroundColor = RED;
+        document.getElementById("dcc_lab_env").value = "";
+        document.getElementById("dcc_env").value = "";
+        document.getElementById("dcc_term").value = "";
+        document.getElementById("dcc_type").value = result[5];
+
+    }
 
 }
 

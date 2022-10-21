@@ -88,16 +88,23 @@ let dcc_check defs env term ty =
     Js.bool res
 
 let transform env term ty = 
-  let env = parse Parser.cc_env env in
-  let term = parse Parser.cc_expr term in
-  let ty = parse Parser.cc_expr ty in
-  let (denv, de, dt) = transform_full env term ty in
-  (
-    Js.string (DCC.print_lab_env (List.rev denv.def)), 
-    Js.string (DCC.print_env (List.rev denv.con)),
-    Js.string (DCC.pprint de),
-    Js.string (DCC.pprint dt)
-  )
+  try
+    Buffer.clear output_buffer;
+    let env = parse Parser.cc_env env in
+    let term = parse Parser.cc_expr term in
+    let ty = parse Parser.cc_expr ty in
+    let (denv, de, dt) = transform_full env term ty in
+    Js.Unsafe.set Js.Unsafe.global "dcc_status" 0;
+    (
+      Js.string (DCC.print_lab_env (List.rev denv.def)), 
+      Js.string (DCC.print_env (List.rev denv.con)),
+      Js.string (DCC.pprint de),
+      Js.string (DCC.pprint dt),
+      Js.string ""
+    )
+  with Exit status ->
+    Js.Unsafe.set Js.Unsafe.global "dcc_status" status;
+    (Js.string "", Js.string "", Js.string "", Js.string "", Js.string (Buffer.contents output_buffer))
 
 
 let () = 
