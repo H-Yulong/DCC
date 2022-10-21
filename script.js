@@ -17,6 +17,9 @@
 // We also have the transformation functions
 // transform: string*3 -> {env: string, term: string, type: string}
 
+const RED = "#FF6666"
+const GREEN = "#B2FF66" 
+
 function cc_infer_button() {
 	var envbox = document.getElementById("cc_env");
     var termbox = document.getElementById("cc_term");
@@ -26,7 +29,12 @@ function cc_infer_button() {
     var env = "[" + envbox.value + "]";
 
     typebox.value = cc_infer(env, termbox.value);
-    cc_type.style.backgroundColor = "white";
+    if (cc_status == 0) {
+        cc_type.style.backgroundColor = "white";  
+    } else {
+        cc_type.style.backgroundColor = RED;
+    }
+    
 }
 
 function cc_check_button() {
@@ -39,9 +47,9 @@ function cc_check_button() {
 
     var result = cc_check(env, termbox.value, typebox.value);
     if (result) {
-    	cc_type.style.backgroundColor = "#B2FF66";
+    	cc_type.style.backgroundColor = GREEN;
     } else {
-    	cc_type.style.backgroundColor = "#FF6666";
+    	cc_type.style.backgroundColor = RED;
     }
 
 }
@@ -62,7 +70,11 @@ function dcc_infer_button() {
     var defs = "[" + labbox.value + "]";
 
     typebox.value = dcc_infer(defs, env, termbox.value);
-    dcc_type.style.backgroundColor = "white";
+    if (dcc_status == 0) {
+        dcc_type.style.backgroundColor = "white";  
+    } else {
+        dcc_type.style.backgroundColor = RED;
+    }
 }
 
 function dcc_check_button() {
@@ -77,9 +89,9 @@ function dcc_check_button() {
 
     var result = dcc_check(defs, env, termbox.value, typebox.value);
     if (result) {
-        dcc_type.style.backgroundColor = "#B2FF66";
+        dcc_type.style.backgroundColor = GREEN;
     } else {
-        dcc_type.style.backgroundColor = "#FF6666";
+        dcc_type.style.backgroundColor = RED;
     }
 
 }

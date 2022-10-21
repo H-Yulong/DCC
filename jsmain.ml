@@ -31,10 +31,10 @@ let cc_infer env term =
       Buffer.clear output_buffer;
       let env = parse Parser.cc_env env in
       let term = parse Parser.cc_expr term in
-      Js.Unsafe.set Js.Unsafe.global "fomega_status" 0;
+      Js.Unsafe.set Js.Unsafe.global "cc_status" 0;
       CC.pprint (CC.infer_type env term)
     with Exit status ->
-      Js.Unsafe.set Js.Unsafe.global "fomega_status" status;
+      Js.Unsafe.set Js.Unsafe.global "cc_status" status;
       Buffer.contents output_buffer
   in
     Js.string res
@@ -46,10 +46,10 @@ let cc_check env term ty =
       let env = parse Parser.cc_env env in
       let term = parse Parser.cc_expr term in
       let ty = parse Parser.cc_expr ty in
-      Js.Unsafe.set Js.Unsafe.global "fomega_status" 0;
+      Js.Unsafe.set Js.Unsafe.global "cc_status" 0;
       CC.type_check env term ty
     with Exit status ->
-      Js.Unsafe.set Js.Unsafe.global "fomega_status" status;
+      Js.Unsafe.set Js.Unsafe.global "cc_status" status;
       false
   in
     Js.bool res
@@ -62,10 +62,10 @@ let dcc_infer defs env term =
       let env = parse Parser.dcc_env env in
       let term = parse Parser.dcc_expr term in
       let context = DCC.mk_ctx defs env in
-      Js.Unsafe.set Js.Unsafe.global "fomega_status" 0;
+      Js.Unsafe.set Js.Unsafe.global "dcc_status" 0;
       DCC.pprint (DCC.infer_type context term)
     with Exit status ->
-      Js.Unsafe.set Js.Unsafe.global "fomega_status" status;
+      Js.Unsafe.set Js.Unsafe.global "dcc_status" status;
       Buffer.contents output_buffer
   in
     Js.string res
@@ -79,10 +79,10 @@ let dcc_check defs env term ty =
       let term = parse Parser.dcc_expr term in
       let ty = parse Parser.dcc_expr ty in
       let context = DCC.mk_ctx defs env in
-      Js.Unsafe.set Js.Unsafe.global "fomega_status" 0;
+      Js.Unsafe.set Js.Unsafe.global "dcc_status" 0;
       DCC.type_check context term ty
     with Exit status ->
-      Js.Unsafe.set Js.Unsafe.global "fomega_status" status;
+      Js.Unsafe.set Js.Unsafe.global "dcc_status" status;
       false
   in
     Js.bool res
