@@ -126,4 +126,33 @@ let transform_full ctx e t =
 
 let transform ctx e = 
 	let t = CC.infer_type ctx e in transform_full ctx e t
-		
+
+
+(* Backward transformation *)
+
+let back_transform_var = function
+	| String s -> CC.String s
+	| Gensym (s, i) -> CC.Gensym (s, i)
+
+let rec back_transform ctx = function
+	| Var x -> CC.Var (back_transform_var x)
+	| Universe i -> CC.Universe i
+	| Label (lab, es) -> 
+		(try
+			let d = lookup_def lab ctx in
+			let fvs = 
+				List.map 
+					(fun (x, e) -> (back_transform_var x, back_transform ctx e)) 
+					(apply_prep d.fvs es) in
+			let x = back_transform_var d.var in
+			let t = back_transform ctx d.dom in
+			let e = back_transform ctx d.expr in
+			CC.Lambda (x, CC.subst fvs t, CC.subst fvs e)
+		with Not_found -> (err "Label not found!"))
+	| Apply (e1, e2) -> CC.App (back_transform ctx e1, back_transform ctx e2)
+	| Pi (x, t, e) -> CC.Pi (back_transform_var x, back_transform ctx t, back_transform ctx e)
+	| Unit -> CC.Unit
+	| UnitType -> CC.UnitType
+
+let rec back_transform_ctx ctx = 
+	List.map (fun (x, e) -> (back_transform_var x, back_transform ctx e)) ctx.con

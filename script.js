@@ -16,6 +16,7 @@
 
 // We also have the transformation functions
 // transform: string*3 -> {defs, env, type, term, err : string}
+// back_transform: string*4 -> {env, type, term, err : string}
 
 const RED = "#FF6666"
 const GREEN = "#B2FF66" 
@@ -57,6 +58,7 @@ function cc_check_button() {
 function cc_clear() {
 	document.getElementById("cc_type").value = "";
 	cc_type.style.backgroundColor = "white";
+    cc_status = 0;
 }
 
 function dcc_infer_button() {
@@ -99,6 +101,7 @@ function dcc_check_button() {
 function dcc_clear() {
     document.getElementById("dcc_type").value = "";
     dcc_type.style.backgroundColor = "white";
+    dcc_status = 0;
 }
 
 function to_dcc() {
@@ -108,12 +111,19 @@ function to_dcc() {
 
     var env = "[" + envbox.value + "]";
     var type = typebox.value
-    if (type == "") {
+
+    // Check if the term input is well-typed when typebox is blank
+    // Do not transform if ill-typed and display error message
+    if ((type == "") || (cc_status != 0)) {
         type = cc_infer(env, termbox.value);
+        if (cc_status != 0) {
+            cc_type.style.backgroundColor = RED;
+            typebox.value = type;
+            return
+        }
     }
 
     var result = transform(env, termbox.value, type);
-
 
     if (dcc_status == 0) {
         dcc_type.style.backgroundColor = "white";
@@ -127,9 +137,34 @@ function to_dcc() {
         document.getElementById("dcc_env").value = "";
         document.getElementById("dcc_term").value = "";
         document.getElementById("dcc_type").value = result[5];
+    }
+}
 
+function to_cc() {
+    var labbox = document.getElementById("dcc_lab_env");
+    var envbox = document.getElementById("dcc_env");
+    var termbox = document.getElementById("dcc_term");
+    var typebox = document.getElementById("dcc_type");
+
+    var env = "[" + envbox.value + "]";
+    var defs = "[" + labbox.value + "]";
+    var type = typebox.value
+    if (type == "") {
+        type = dcc_infer(env, termbox.value);
     }
 
+    var result = back_transform(defs, env, termbox.value, type);
+    if (cc_status == 0) {
+        cc_type.style.backgroundColor = "white";
+        document.getElementById("cc_env").value = result[1];
+        document.getElementById("cc_term").value = result[2];
+        document.getElementById("cc_type").value = result[3];
+    } else {
+        cc_type.style.backgroundColor = RED;
+        document.getElementById("cc_env").value = "";
+        document.getElementById("cc_term").value = "";
+        document.getElementById("cc_type").value = result[4];
+    }
 }
 
 

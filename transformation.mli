@@ -35,3 +35,6 @@ val transform_full :
 val transform :
   (CC.variable * CC.expr) list ->
   CC.expr -> DCC.context * DCC.expr * DCC.expr
+val back_transform_var : DCC.variable -> CC.variable
+val back_transform : DCC.context -> DCC.expr -> CC.expr
+val back_transform_ctx : DCC.context -> (CC.variable * CC.expr) list

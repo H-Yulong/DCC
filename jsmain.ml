@@ -103,8 +103,29 @@ let transform env term ty =
       Js.string ""
     )
   with Exit status ->
+    let msg = "Transformation error:\n" ^ (Buffer.contents output_buffer) in
     Js.Unsafe.set Js.Unsafe.global "dcc_status" status;
-    (Js.string "", Js.string "", Js.string "", Js.string "", Js.string (Buffer.contents output_buffer))
+    (Js.string "", Js.string "", Js.string "", Js.string "", Js.string msg)
+
+let back_transform defs env term ty = 
+  try
+    Buffer.clear output_buffer;
+    let defs = parse Parser.dcc_lab_env defs in
+    let env = parse Parser.dcc_env env in
+    let term = parse Parser.dcc_expr term in
+    let ty = parse Parser.dcc_expr ty in
+    let context = DCC.mk_ctx defs env in
+    Js.Unsafe.set Js.Unsafe.global "cc_status" 0;
+    (
+      Js.string (CC.print_env (List.rev (back_transform_ctx context))),
+      Js.string (CC.pprint (back_transform context term)),
+      Js.string (CC.pprint (back_transform context ty)),
+      Js.string ""
+    )
+  with Exit status ->
+    let msg = "Transformation error:\n" ^ (Buffer.contents output_buffer) in
+    Js.Unsafe.set Js.Unsafe.global "cc_status" status;
+    (Js.string "", Js.string "", Js.string "", Js.string msg)
 
 
 let () = 
@@ -112,4 +133,5 @@ let () =
   Js.Unsafe.set Js.Unsafe.global "cc_check" (Js.wrap_callback cc_check);
   Js.Unsafe.set Js.Unsafe.global "dcc_infer" (Js.wrap_callback dcc_infer);
   Js.Unsafe.set Js.Unsafe.global "dcc_check" (Js.wrap_callback dcc_check);
-  Js.Unsafe.set Js.Unsafe.global "transform" (Js.wrap_callback transform)
+  Js.Unsafe.set Js.Unsafe.global "transform" (Js.wrap_callback transform);
+  Js.Unsafe.set Js.Unsafe.global "back_transform" (Js.wrap_callback back_transform)
