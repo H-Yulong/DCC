@@ -76,13 +76,15 @@ dcc_expr:
 
 DCCExpr:
   | DCCApp                                       { $1 }
-  | Var LBRACE RBRACE                            { DCC.Label (DCC.Lab $1.v, []) }
-  | Var LBRACE DCCExprList RBRACE                { DCC.Label (DCC.Lab $1.v, $3) }
   | PI Var COLON DCCExpr DOT DCCExpr             { DCC.Pi (DCC.String $2.v, $4, $6) }
 
 DCCExprList:
   | DCCExpr                                      { [$1] }
   | DCCExpr COMMA DCCExprList                    { $1 :: $3 }
+
+DCCLab:
+  | Var LBRACE RBRACE                            { DCC.Label (DCC.Lab $1.v, []) }
+  | Var LBRACE DCCExprList RBRACE                { DCC.Label (DCC.Lab $1.v, $3) }
 
 DCCApp:
   | DCCAtomic                                    { $1 }
@@ -91,6 +93,7 @@ DCCApp:
 DCCAtomic: 
   | LPAREN DCCExpr RPAREN                        { $2 }
   | LPAREN RPAREN                                { DCC.Unit }
+  | DCCLab                                       { $1 }
   | UnitType                                     { DCC.UnitType }
   | Universe                                     { DCC.Universe $1.v }
   | Var                                          { DCC.Var (DCC.String $1.v) }
