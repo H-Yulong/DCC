@@ -59,7 +59,7 @@ let universe = ['U'] digit*
 (* The main body of the lexical analyzer *)
 rule main = parse
   whitespace+                       { main lexbuf }
-| whitespace*("\r")?"\n"            { main lexbuf }
+| whitespace*("\r")?"\n"            { newline lexbuf; main lexbuf }
 | universe as u                     { Universe {i=info lexbuf;v=(int_of_string (str_tail u))}  }
 | "\\Pi"                            { PI (info lexbuf) }
 | "Pi"                              { PI (info lexbuf) }

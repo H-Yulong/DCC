@@ -17,7 +17,7 @@ let () = set_formatter_output_functions print flush
 
 let parse process input = 
   let s = Js.to_string input in
-  let lexbuf = Lexing.from_string s in
+  let lexbuf = Lexer.from_string s in
   let res = 
     try 
       process Lexer.main lexbuf
