@@ -20,6 +20,7 @@
 
 const RED = "#FF6666"
 const GREEN = "#B2FF66" 
+const LBLUE = "#E8F1FF"
 
 function cc_infer_button() {
 	var envbox = document.getElementById("cc_env");
@@ -31,7 +32,7 @@ function cc_infer_button() {
 
     typebox.value = cc_infer(env, termbox.value);
     if (cc_status == 0) {
-        cc_type.style.backgroundColor = "white";  
+        cc_type.style.backgroundColor = LBLUE;  
     } else {
         cc_type.style.backgroundColor = RED;
     }
@@ -57,7 +58,7 @@ function cc_check_button() {
 
 function cc_clear() {
 	document.getElementById("cc_type").value = "";
-	cc_type.style.backgroundColor = "white";
+	cc_type.style.backgroundColor = LBLUE;
     cc_status = 0;
 }
 
@@ -73,7 +74,7 @@ function dcc_infer_button() {
 
     typebox.value = dcc_infer(defs, env, termbox.value);
     if (dcc_status == 0) {
-        dcc_type.style.backgroundColor = "white";  
+        dcc_type.style.backgroundColor = LBLUE;  
     } else {
         dcc_type.style.backgroundColor = RED;
     }
@@ -100,7 +101,7 @@ function dcc_check_button() {
 
 function dcc_clear() {
     document.getElementById("dcc_type").value = "";
-    dcc_type.style.backgroundColor = "white";
+    dcc_type.style.backgroundColor = LBLUE;
     dcc_status = 0;
 }
 
@@ -126,7 +127,7 @@ function to_dcc() {
     var result = transform(env, termbox.value, type);
 
     if (dcc_status == 0) {
-        dcc_type.style.backgroundColor = "white";
+        dcc_type.style.backgroundColor = LBLUE;
         document.getElementById("dcc_lab_env").value = result[1];
         document.getElementById("dcc_env").value = result[2];
         document.getElementById("dcc_term").value = result[3];
@@ -155,7 +156,7 @@ function to_cc() {
 
     var result = back_transform(defs, env, termbox.value, type);
     if (cc_status == 0) {
-        cc_type.style.backgroundColor = "white";
+        cc_type.style.backgroundColor = LBLUE;
         document.getElementById("cc_env").value = result[1];
         document.getElementById("cc_term").value = result[2];
         document.getElementById("cc_type").value = result[3];
