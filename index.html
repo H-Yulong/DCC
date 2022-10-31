@@ -17,41 +17,48 @@
 			<tr>
 				<td rowspan=2> Context </td>
 				<td rowspan=2><textarea id="cc_env"></textarea></td>
-				<td rowspan=2><button> Click </button></td>
+				<td rowspan=2><button onclick="cc_wf_button()"> Check context </button></td>
 
 				<td> Label Context </td>
 				<td><textarea id="dcc_lab_env"></textarea></td>
-				<td><button> Click </button></td>
+				<td><button> Check label context </button></td>
 			</tr>
 			<tr>
 				<td> Type Context </td>
 				<td><textarea id="dcc_env"></textarea></td>
-				<td><button> Click </button></td>
+				<td><button> Check type context </button></td>
 			</tr>
 			<tr>
 				<td> Term </td>
 				<td><textarea id="cc_term"></textarea></td>
 				<td>
 					<button onclick="cc_infer_button()"> Infer type </button>
-					<button onclick="cc_check_button()"> Type check </button>
+					<button onclick="cc_norm_button()"> Normalize </button>
+					<button onclick="cc_back_button()" id="back_button" style="display: none;"> Back </button>
 					<button onclick="to_dcc()"> Transform to DCC </button>
 				</td>
 				<td> Term </td>
 				<td><textarea id="dcc_term"></textarea></td>
 				<td>
 					<button onclick="dcc_infer_button()"> Infer type </button>
-					<button onclick="dcc_check_button()"> Type check </button>
+					<button onclick="dcc_norm_button()"> Normalize </button>
 					<button onclick="to_cc()"> Transform to CC </button>
 				</td>
 			</tr>
 			<tr>
-				<td> Type </td>
+				<td> Type<br>(Output) </td>
 				<td><textarea id="cc_type"></textarea></td>
-				<td><button onclick="cc_clear()"> Clear </button></td>
+				<td>
+					<button onclick="cc_check_button()"> Type check </button>
+					<button onclick="cc_clear()"> Clear </button>
+				</td>
 
-				<td> Type </td>
+				<td> Type<br>(Output) </td>
 				<td><textarea id="dcc_type"></textarea></td>
-				<td><button onclick="dcc_clear()"> Clear </button></td>
+				<td>
+					<button onclick="dcc_check_button()"> Type check </button>
+					<button onclick="dcc_clear()"> Clear </button>
+				</td>
 			</tr>
 		</table>
 	</body>

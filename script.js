@@ -1,8 +1,3 @@
-// External functions:
-
-// cc_infer : string*2 -> string
-// [cc_infer(env, term)] gives the type of the term, or the error message if fails.
-
 // cc_check : string*3 -> bool
 // [cc_check(env, term, type)] checks if env |- term : type.
 
@@ -22,6 +17,32 @@ const RED = "#FF6666"
 const GREEN = "#B2FF66" 
 const LBLUE = "#E8F1FF"
 
+const GOESTO = "\n\n\u25B9* "
+
+var cc_status = 0
+var dcc_status = 0
+
+// cc_check_ctx : string -> string
+// [cc_check_ctx(ctx)] checks if the ctx is well-formed.
+// If so, it returns an empty string. If not, it returns the error message.
+function cc_wf_button() {
+    var envbox = document.getElementById("cc_env");
+    var env = "[" + envbox.value + "]";
+
+    var result = cc_check_ctx(env);
+
+    var outbox = document.getElementById("cc_type");
+    if (cc_status == 0) {
+        outbox.style.backgroundColor = GREEN;
+        outbox.value = result;
+    } else {
+        outbox.style.backgroundColor = RED;
+        outbox.value = "Well-formedness check:\n" + result;
+    }
+}
+
+// cc_infer : string*2 -> string
+// [cc_infer(env, term)] gives the type of the term, or the error message if fails.
 function cc_infer_button() {
 	var envbox = document.getElementById("cc_env");
     var termbox = document.getElementById("cc_term");
@@ -35,8 +56,37 @@ function cc_infer_button() {
         cc_type.style.backgroundColor = LBLUE;  
     } else {
         cc_type.style.backgroundColor = RED;
-    }
-    
+    }   
+}
+
+// cc_normalize : string*2 -> string
+// [cc_normalize(env, term)] normalizes the term, or gives the error message if it fails.
+var cc_buffer = ""
+function cc_norm_button() {
+    var envbox = document.getElementById("cc_env");
+    var termbox = document.getElementById("cc_term");
+
+    // Get context
+    var env = "[" + envbox.value + "]";
+    var term = termbox.value;
+
+    cc_buffer = term;
+    back_button.style.display = "block";
+
+    var result = cc_normalize(env, term);
+    if (cc_status == 0) {
+        cc_term.style.backgroundColor = LBLUE;
+        termbox.value = term + GOESTO + result; 
+    } else {
+        cc_term.style.backgroundColor = RED;
+        termbox.value = result;
+    }  
+}
+
+function cc_back_button() {
+    document.getElementById("cc_term").value = cc_buffer;
+    cc_term.style.backgroundColor = LBLUE;
+    back_button.style.display = "none";
 }
 
 function cc_check_button() {
@@ -53,7 +103,6 @@ function cc_check_button() {
     } else {
     	cc_type.style.backgroundColor = RED;
     }
-
 }
 
 function cc_clear() {
