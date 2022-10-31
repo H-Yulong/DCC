@@ -1,10 +1,11 @@
 (* #use "transformation.ml";; *)
 
-#use "cc.ml"
-#use "labelled_cc.ml"
-#use "dcc.ml"
+open Err.Error
+open Cc
+open Labelled_cc
+open Dcc.DCC
 
-open DCC
+
 
 (* [transform_var x] turns a variable in CC to a variable in DCC *)
 let transform_var = function
@@ -62,7 +63,7 @@ let rec transform_lab ctx = function
 	| LCC.Pi (x, t, e) -> Pi (transform_lab_var x, transform_lab ctx t, transform_lab ((x,t) :: ctx) e)
 	| LCC.Lambda ((x, t, e), c) -> 
 		let fvs = List.map (fun x -> Var (transform_lab_var x)) (fv ctx (LCC.Lambda ((x, t, e), c)))
-		in Label(Labsym("_", c), fvs) 
+		in Label(Labsym("L", c), fvs) 
 	| LCC.App (e1, e2) -> Apply (transform_lab ctx e1, transform_lab ctx e2)
 	| LCC.UnitType -> UnitType
 	| LCC.Unit -> Unit
@@ -96,9 +97,9 @@ let rec def_lab_full ctx e ty = match e, ty with
 		let t' = transform_lab ctx t in
 		let te' = transform_lab ctx' te in
 		let e' = transform_lab ctx' e in
-					merge_defs ((Labsym("_", c), (mk_def fvs (transform_lab_var x) t' te' e')) :: (def_lab_full ctx t (Universe 0))) (def_lab_full ctx' e te)
+					merge_defs ((Labsym("L", c), (mk_def fvs (transform_lab_var x) t' te' e')) :: (def_lab_full ctx t (Universe 0))) (def_lab_full ctx' e te)
 
-	| _, _ -> raise (DCC.Error "Error in transformation!")
+	| _, _ -> (err "Error in transformation!")
 
 let def_lab ctx e = def_lab_full ctx e (LCC.infer_type ctx e)
 
@@ -107,6 +108,7 @@ let rec def_ctx_lab = function
 	| (x, t) :: ctx -> (def_lab ctx t) @ (def_ctx_lab ctx)
 
 let check_type_preservation ctx e t = 
+	let _ = LCC.init () in
 	let ctx' = LCC.translate_ctx ctx in
 	let e' = LCC.translate e in
 	let t' = LCC.translate t in
@@ -114,6 +116,7 @@ let check_type_preservation ctx e t =
 		type_check (mk_ctx defs (transform_lab_ctx ctx')) (transform_lab ctx' e') (transform_lab ctx' t')
 
 let transform_full ctx e t = 
+	let _ = LCC.init () in
 	let ctx' = LCC.translate_ctx ctx in
 	let e' = LCC.translate e in
 	let t' = LCC.translate t in
@@ -123,4 +126,33 @@ let transform_full ctx e t =
 
 let transform ctx e = 
 	let t = CC.infer_type ctx e in transform_full ctx e t
-		
+
+
+(* Backward transformation *)
+
+let back_transform_var = function
+	| String s -> CC.String s
+	| Gensym (s, i) -> CC.Gensym (s, i)
+
+let rec back_transform ctx = function
+	| Var x -> CC.Var (back_transform_var x)
+	| Universe i -> CC.Universe i
+	| Label (lab, es) -> 
+		(try
+			let d = lookup_def lab ctx in
+			let fvs = 
+				List.map 
+					(fun (x, e) -> (back_transform_var x, back_transform ctx e)) 
+					(apply_prep d.fvs es) in
+			let x = back_transform_var d.var in
+			let t = back_transform ctx d.dom in
+			let e = back_transform ctx d.expr in
+			CC.Lambda (x, CC.subst fvs t, CC.subst fvs e)
+		with Not_found -> (err "Label not found!"))
+	| Apply (e1, e2) -> CC.App (back_transform ctx e1, back_transform ctx e2)
+	| Pi (x, t, e) -> CC.Pi (back_transform_var x, back_transform ctx t, back_transform ctx e)
+	| Unit -> CC.Unit
+	| UnitType -> CC.UnitType
+
+let rec back_transform_ctx ctx = 
+	List.map (fun (x, e) -> (back_transform_var x, back_transform ctx e)) ctx.con

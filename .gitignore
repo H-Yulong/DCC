@@ -3,4 +3,15 @@
 /old
 dune
 dune-project
+*.byte
+*.cmi
+*.cmo
+*.exe
+lexer.ml 
+parser.ml 
+parser.mli
+parser.output 
+parser.automaton 
+parser.conflicts 
+parser.dot
 

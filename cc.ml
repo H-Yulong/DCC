@@ -3,10 +3,11 @@
    and unit type.
 *)
 
+open Err.Error
+
 module CC = struct
 
   (* SYNTAX *)
-  exception Error of string
 
   (* Gensym for renaming variables; Dummy for pretty printing. *)
   type variable =
@@ -25,6 +26,8 @@ module CC = struct
 
   type context = (variable * expr) list
 
+  (* UTILITY FUNCTIONS *)
+
   (** [lookup_ty x ctx] returns the type of [x] in context [ctx]. *)
   let lookup_ty x ctx = List.assoc x ctx
 
@@ -35,6 +38,30 @@ module CC = struct
     | String s -> s
     | Gensym (s, _) -> s
 
+
+  (* Pretty-printing *)
+  let rec pprint = function
+    | Var x -> print_var x
+    | Universe i -> "U" ^ (string_of_int i)
+    | Pi (x, t, e) -> Printf.sprintf "\206\160%s:%s.%s" (print_var x) (print_paren t) (pprint e)
+    | Lambda (x, t, e) -> Printf.sprintf "\206\187%s:%s. %s" (print_var x) (pprint t) (pprint e)
+    | App (e1, e2) -> Printf.sprintf "%s %s" (print_paren e1) (print_paren e2)
+    | Unit -> "()"
+    | UnitType -> "Unit"
+  
+  (* For wrapping parenthesis resonably *)
+  and print_paren exp = match exp with
+    | Lambda (x, t, e) -> Printf.sprintf "(\206\187%s:%s. %s)" (print_var x) (pprint t) (pprint e)
+    | App (e1, e2) -> Printf.sprintf "(%s %s)" (print_paren e1) (print_paren e2)
+    | Pi es -> "(" ^ pprint (Pi es) ^ ")"
+    | _ -> pprint exp
+
+  let rec print_env = function
+    | [] -> ""
+    | (x, e) :: [] -> (print_var x) ^ ":" ^ (pprint e)
+    | (x, e) :: (e2 :: es) -> Printf.sprintf "%s:%s, %s" (print_var x) (pprint e) (print_env (e2 :: es))
+
+  (* Implementation of the language *)
 
   (* SUBSTITUTION *)
 
@@ -110,11 +137,8 @@ module CC = struct
       (try 
          well_formed ctx; lookup_ty x ctx
          with 
-            | Not_found -> raise (Error ("Unbound variable: " ^ (print_var x)))
-            | Error _ -> raise (Error "Mal-formed context"))
-    | Universe k -> 
-      (try well_formed ctx; Universe (k + 1)
-       with Error _ -> raise (Error "Mal-formed context"))
+            | Not_found -> (err ("Unbound variable: " ^ (print_var x))))
+    | Universe k -> well_formed ctx; Universe (k + 1)
     | Pi (x, t1, t2) ->
       let k1 = infer_universe ctx t1 in
       let k2 = infer_universe (extend x t1 ctx) t2 in
@@ -136,7 +160,7 @@ module CC = struct
     let u = infer_type ctx t in
       match normalize u with
         | Universe k -> k
-        | App _ | Var _ | Pi _ | Lambda _ | UnitType | Unit -> raise (Error "Not a universe")
+        | App _ | Var _ | Pi _ | Lambda _ | UnitType | Unit -> (err "Not a universe")
 
   (** [infer_pi ctx e] infers the type of [e] in context [ctx], verifies that it is
       of the form [Pi (x, t1, t2)] and returns the triple [(x, t1, t2)]. *)
@@ -144,12 +168,12 @@ module CC = struct
     let t = infer_type ctx e in
       match normalize t with
         | Pi a -> a
-        | Var _ | App _ | Universe _ | Lambda _ | UnitType | Unit -> raise (Error "Not a pi-type") 
+        | Var _ | App _ | Universe _ | Lambda _ | UnitType | Unit -> (err "Not a pi-type")
 
   (** [check_equal e1 e2] checks that expressions [e1] and [e2] are equal. *)
   and check_equal e1 e2 =
     if not (equal e1 e2)
-    then raise (Error "Argument type does not match")
+    then err "Argument type does not match"
 
   and well_formed = function
     | [] -> ()
@@ -161,11 +185,9 @@ module CC = struct
   (* TYPE CHECKING *)
   (* Infer type, check if the given type expression equals to the inferred type.*)
   let type_check ctx e t = 
-      try 
-        let _ = infer_universe ctx t in
-        let te = infer_type ctx e in
-        let t' = normalize t in
-          equal te t'
-      with Error msg -> raise (Error msg)
+    let _ = infer_universe ctx t in
+    let te = infer_type ctx e in
+    let t' = normalize ctx t in
+      equal te t'
       
 end;;

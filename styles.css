@@ -1,0 +1,23 @@
+:root {
+	--BLUE: #C9D9F2;
+	--LBLUE: #E8F1FF;
+}
+
+td {
+	border: 1px solid black;
+}
+
+textarea {
+	width: 500px;
+	height: 90px;
+	background-color: var(--LBLUE);
+}
+
+body {
+	background-color: var(--BLUE);
+}
+
+button {
+	width: 100%;
+}
+
