@@ -53,14 +53,13 @@ let cc_infer env term =
   in
     Js.string res
 
-let cc_normalize env term =
+let cc_normalize term =
   let res = 
     try 
       Buffer.clear output_buffer;
-      let env = parse Parser.cc_env env "CC context" in
       let term = parse Parser.cc_expr term "CC term" in
       Js.Unsafe.set Js.Unsafe.global "cc_status" 0;
-      CC.pprint (CC.normalize env term)
+      CC.pprint (CC.normalize term)
     with Exit status ->
       Js.Unsafe.set Js.Unsafe.global "cc_status" status;
       Buffer.contents output_buffer

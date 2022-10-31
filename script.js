@@ -63,20 +63,15 @@ function cc_infer_button() {
 // [cc_normalize(env, term)] normalizes the term, or gives the error message if it fails.
 var cc_buffer = ""
 function cc_norm_button() {
-    var envbox = document.getElementById("cc_env");
     var termbox = document.getElementById("cc_term");
 
-    // Get context
-    var env = "[" + envbox.value + "]";
-    var term = termbox.value;
-
-    cc_buffer = term;
+    cc_buffer = termbox.value;
     back_button.style.display = "block";
 
-    var result = cc_normalize(env, term);
+    var result = cc_normalize(termbox.value);
     if (cc_status == 0) {
         cc_term.style.backgroundColor = LBLUE;
-        termbox.value = term + GOESTO + result; 
+        termbox.value = termbox.value + GOESTO + result; 
     } else {
         cc_term.style.backgroundColor = RED;
         termbox.value = result;

@@ -187,7 +187,7 @@ module CC = struct
   let type_check ctx e t = 
     let _ = infer_universe ctx t in
     let te = infer_type ctx e in
-    let t' = normalize ctx t in
+    let t' = normalize t in
       equal te t'
       
 end;;
