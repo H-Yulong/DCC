@@ -12,8 +12,8 @@ td {
 }
 
 textarea {
-	width: 500px;
-	height: 90px;
+	min-width: 500px;
+	min-height: 90px;
 	background-color: var(--LBLUE);
 }
 
