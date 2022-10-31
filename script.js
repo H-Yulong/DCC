@@ -1,6 +1,3 @@
-// cc_check : string*3 -> bool
-// [cc_check(env, term, type)] checks if env |- term : type.
-
 // The external functions for DCC are similar.
 
 // dcc_infer: string*3 -> string
@@ -9,8 +6,6 @@
 // dcc_check: string*4 -> string
 // [dcc_check(type_env, label_env, term, type)]
 
-// We also have the transformation functions
-// transform: string*3 -> {defs, env, type, term, err : string}
 // back_transform: string*4 -> {env, type, term, err : string}
 
 const RED = "#FF6666"
@@ -42,7 +37,7 @@ function cc_wf_button() {
 }
 
 // cc_infer : string*2 -> string
-// [cc_infer(env, term)] gives the type of the term, or the error message if fails.
+// [cc_infer(env, term)] gives the type of the term (normalized), or the error message if fails.
 function cc_infer_button() {
 	var envbox = document.getElementById("cc_env");
     var termbox = document.getElementById("cc_term");
@@ -51,11 +46,13 @@ function cc_infer_button() {
     // Get context
     var env = "[" + envbox.value + "]";
 
-    typebox.value = cc_infer(env, termbox.value);
+    var result = cc_infer(env, termbox.value);
     if (cc_status == 0) {
-        cc_type.style.backgroundColor = LBLUE;  
+        cc_type.style.backgroundColor = LBLUE;
+        typebox.value = result; 
     } else {
         cc_type.style.backgroundColor = RED;
+        typebox.value = "Infer type:\n" + result;
     }   
 }
 
@@ -74,7 +71,7 @@ function cc_norm_button() {
         termbox.value = termbox.value + GOESTO + result; 
     } else {
         cc_term.style.backgroundColor = RED;
-        termbox.value = result;
+        termbox.value = "Normalize:\n" + result;
     }  
 }
 
@@ -84,6 +81,8 @@ function cc_back_button() {
     back_button.style.display = "none";
 }
 
+// cc_check : string*3 -> bool
+// [cc_check(env, term, type)] checks if env |- term : type.
 function cc_check_button() {
 	var envbox = document.getElementById("cc_env");
     var termbox = document.getElementById("cc_term");
@@ -100,6 +99,7 @@ function cc_check_button() {
     }
 }
 
+// Clears the CC output box
 function cc_clear() {
 	document.getElementById("cc_type").value = "";
 	cc_type.style.backgroundColor = LBLUE;
@@ -149,29 +149,44 @@ function dcc_clear() {
     dcc_status = 0;
 }
 
+// transform: string*3 -> {defs, env, type, term, err : string}
 function to_dcc() {
     var envbox = document.getElementById("cc_env");
     var termbox = document.getElementById("cc_term");
     var typebox = document.getElementById("cc_type");
 
     var env = "[" + envbox.value + "]";
-    var type = typebox.value
 
-    // Check if the term input is well-typed when typebox is blank
-    // Do not transform if ill-typed and display error message
-    if ((type == "") || (cc_status != 0)) {
-        type = cc_infer(env, termbox.value);
-        if (cc_status != 0) {
-            cc_type.style.backgroundColor = RED;
-            typebox.value = type;
-            return
-        }
+    // Transformation is only defined for well-typed terms.
+    // Checks if the input term is well-typed.
+
+    var type = cc_infer(env, termbox.value);
+    if (cc_status != 0){
+        cc_type.style.backgroundColor = RED;
+        typebox.value = "Transformation: cannot transform ill-typed terms\n" + type;
+        return
+    }
+
+    // If there is an input type, check if it matches the inferred type.
+    // If not, does not transform, but hint that the type can be inferred.
+    if ((typebox.value != "") && (!cc_check(env, termbox.value, typebox.value))) {
+        cc_type.style.backgroundColor = RED;
+        typebox.value = 
+            "Transformation: input type does not match the inferred type of input term\n" 
+            + "Did you mean this type?\n" + type;
+        return
+    }
+
+    if (typebox.value != "") {
+        type = typebox.value;
     }
 
     var result = transform(env, termbox.value, type);
 
     if (dcc_status == 0) {
+        cc_type.style.backgroundColor = LBLUE;
         dcc_type.style.backgroundColor = LBLUE;
+        typebox.value = type;
         document.getElementById("dcc_lab_env").value = result[1];
         document.getElementById("dcc_env").value = result[2];
         document.getElementById("dcc_term").value = result[3];
