@@ -21,12 +21,12 @@
 
 				<td> Label Context </td>
 				<td><textarea id="dcc_lab_env"></textarea></td>
-				<td><button> Check label context </button></td>
+				<td><button onclick="dcc_wflb_button()"> Check label context </button></td>
 			</tr>
 			<tr>
 				<td> Type Context </td>
 				<td><textarea id="dcc_env"></textarea></td>
-				<td><button> Check type context </button></td>
+				<td><button onclick="dcc_wf_button()"> Check type context </button></td>
 			</tr>
 			<tr>
 				<td> Term </td>
@@ -34,7 +34,7 @@
 				<td>
 					<button onclick="cc_infer_button()"> Infer type </button>
 					<button onclick="cc_norm_button()"> Normalize </button>
-					<button onclick="cc_back_button()" id="back_button" style="display: none;"> Back </button>
+					<button onclick="cc_back_button()" id="back_button1" style="display: none;"> Back </button>
 					<button onclick="to_dcc()"> Transform to DCC </button>
 				</td>
 				<td> Term </td>
@@ -42,6 +42,7 @@
 				<td>
 					<button onclick="dcc_infer_button()"> Infer type </button>
 					<button onclick="dcc_norm_button()"> Normalize </button>
+					<button onclick="dcc_back_button()" id="back_button2" style="display: none;"> Back </button>
 					<button onclick="to_cc()"> Transform to CC </button>
 				</td>
 			</tr>

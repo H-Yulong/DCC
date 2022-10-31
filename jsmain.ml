@@ -81,6 +81,35 @@ let cc_check env term ty =
   in
     Js.bool res
 
+let dcc_check_lbctx env = 
+  let res = 
+    try 
+      Buffer.clear output_buffer;
+      let env = parse Parser.dcc_lab_env env "DCC label context"in
+      Js.Unsafe.set Js.Unsafe.global "dcc_status" 0;
+      DCC.well_formed_def env;
+      "Label ontext OK."
+    with Exit status ->
+      Js.Unsafe.set Js.Unsafe.global "dcc_status" status;
+      Buffer.contents output_buffer
+  in
+    Js.string res
+
+let dcc_check_ctx defs env = 
+  let res = 
+    try 
+      Buffer.clear output_buffer;
+      let defs = parse Parser.dcc_lab_env defs "DCC label context" in
+      let env = parse Parser.dcc_env env "DCC type context" in
+      Js.Unsafe.set Js.Unsafe.global "dcc_status" 0;
+      DCC.well_formed (DCC.mk_ctx defs env);
+      "Type ontext OK."
+    with Exit status ->
+      Js.Unsafe.set Js.Unsafe.global "dcc_status" status;
+      Buffer.contents output_buffer
+  in
+    Js.string res
+
 let dcc_infer defs env term =
   let res = 
     try 
@@ -90,7 +119,21 @@ let dcc_infer defs env term =
       let term = parse Parser.dcc_expr term "DCC context" in
       let context = DCC.mk_ctx defs env in
       Js.Unsafe.set Js.Unsafe.global "dcc_status" 0;
-      DCC.pprint (DCC.infer_type context term)
+      DCC.pprint (DCC.normalize context (DCC.infer_type context term))
+    with Exit status ->
+      Js.Unsafe.set Js.Unsafe.global "dcc_status" status;
+      Buffer.contents output_buffer
+  in
+    Js.string res
+
+let dcc_normalize lab term =
+  let res = 
+    try 
+      Buffer.clear output_buffer;
+      let lab = parse Parser.dcc_lab_env lab "DCC label context" in
+      let term = parse Parser.dcc_expr term "DCC term" in
+      Js.Unsafe.set Js.Unsafe.global "dcc_status" 0;
+      DCC.pprint (DCC.normalize (DCC.mk_ctx lab []) term)
     with Exit status ->
       Js.Unsafe.set Js.Unsafe.global "dcc_status" status;
       Buffer.contents output_buffer
@@ -160,7 +203,12 @@ let () =
   Js.Unsafe.set Js.Unsafe.global "cc_infer" (Js.wrap_callback cc_infer);
   Js.Unsafe.set Js.Unsafe.global "cc_normalize" (Js.wrap_callback cc_normalize);
   Js.Unsafe.set Js.Unsafe.global "cc_check" (Js.wrap_callback cc_check);
+  
+  Js.Unsafe.set Js.Unsafe.global "dcc_check_lbctx" (Js.wrap_callback dcc_check_lbctx);
+  Js.Unsafe.set Js.Unsafe.global "dcc_check_ctx" (Js.wrap_callback dcc_check_ctx);
   Js.Unsafe.set Js.Unsafe.global "dcc_infer" (Js.wrap_callback dcc_infer);
+  Js.Unsafe.set Js.Unsafe.global "dcc_normalize" (Js.wrap_callback dcc_normalize);
   Js.Unsafe.set Js.Unsafe.global "dcc_check" (Js.wrap_callback dcc_check);
+
   Js.Unsafe.set Js.Unsafe.global "transform" (Js.wrap_callback transform);
   Js.Unsafe.set Js.Unsafe.global "back_transform" (Js.wrap_callback back_transform)

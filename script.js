@@ -1,13 +1,3 @@
-// The external functions for DCC are similar.
-
-// dcc_infer: string*3 -> string
-// [dcc_infer(type_env, label_env, term)]
-
-// dcc_check: string*4 -> string
-// [dcc_check(type_env, label_env, term, type)]
-
-// back_transform: string*4 -> {env, type, term, err : string}
-
 const RED = "#FF6666"
 const GREEN = "#B2FF66" 
 const LBLUE = "#E8F1FF"
@@ -63,7 +53,7 @@ function cc_norm_button() {
     var termbox = document.getElementById("cc_term");
 
     cc_buffer = termbox.value;
-    back_button.style.display = "block";
+    back_button1.style.display = "block";
 
     var result = cc_normalize(termbox.value);
     if (cc_status == 0) {
@@ -78,7 +68,7 @@ function cc_norm_button() {
 function cc_back_button() {
     document.getElementById("cc_term").value = cc_buffer;
     cc_term.style.backgroundColor = LBLUE;
-    back_button.style.display = "none";
+    back_button1.style.display = "none";
 }
 
 // cc_check : string*3 -> bool
@@ -106,6 +96,49 @@ function cc_clear() {
     cc_status = 0;
 }
 
+// dcc_check_lbctx : string -> string
+// [dcc_check_lbctx(ctx)] checks if the label ctx is well-formed.
+// If so, it returns an empty string. If not, it returns the error message.
+function dcc_wflb_button() {
+    var labbox = document.getElementById("dcc_lab_env");
+    var defs = "[" + labbox.value + "]";
+
+    var result = dcc_check_lbctx(defs);
+
+    var outbox = document.getElementById("dcc_type");
+    if (dcc_status == 0) {
+        outbox.style.backgroundColor = GREEN;
+        outbox.value = result;
+    } else {
+        outbox.style.backgroundColor = RED;
+        outbox.value = "Label context well-formedness check:\n" + result;
+    }
+}
+
+// dcc_check_ctx : string*2 -> string
+// [dcc_check_ctx(defs, ctx)] checks if the type ctx is well-formed.
+// If so, it returns an empty string. If not, it returns the error message.
+function dcc_wf_button() {
+    var labbox = document.getElementById("dcc_lab_env");
+    var envbox = document.getElementById("dcc_env");
+    
+    var env = "[" + envbox.value + "]";
+    var defs = "[" + labbox.value + "]";
+
+    var result = dcc_check_ctx(defs, env);
+
+    var outbox = document.getElementById("dcc_type");
+    if (dcc_status == 0) {
+        outbox.style.backgroundColor = GREEN;
+        outbox.value = result;
+    } else {
+        outbox.style.backgroundColor = RED;
+        outbox.value = "Type context well-formedness check:\n" + result;
+    }
+}
+
+// dcc_infer: string*3 -> string
+// [dcc_infer(type_env, label_env, term)]
 function dcc_infer_button() {
     var labbox = document.getElementById("dcc_lab_env");
     var envbox = document.getElementById("dcc_env");
@@ -124,6 +157,36 @@ function dcc_infer_button() {
     }
 }
 
+// dcc_normalize : string*2 -> string
+// [dcc_normalize(type_env, term)]
+var dcc_buffer = ""
+function dcc_norm_button() {
+    var labbox = document.getElementById("dcc_lab_env");
+    var termbox = document.getElementById("dcc_term");
+
+    var lab = "[" + labbox.value + "]";
+
+    dcc_buffer = termbox.value;
+    back_button2.style.display = "block";
+
+    var result = dcc_normalize(lab, termbox.value);
+    if (dcc_status == 0) {
+        dcc_term.style.backgroundColor = LBLUE;
+        termbox.value = termbox.value + GOESTO + result; 
+    } else {
+        dcc_term.style.backgroundColor = RED;
+        termbox.value = "Normalize:\n" + result;
+    }  
+}
+
+function dcc_back_button() {
+    document.getElementById("dcc_term").value = dcc_buffer;
+    cc_term.style.backgroundColor = LBLUE;
+    back_button2.style.display = "none";
+}
+
+// dcc_check: string*4 -> string
+// [dcc_check(type_env, label_env, term, type)]
 function dcc_check_button() {
     var labbox = document.getElementById("dcc_lab_env");
     var envbox = document.getElementById("dcc_env");
@@ -177,7 +240,9 @@ function to_dcc() {
         return
     }
 
-    if (typebox.value != "") {
+    if (typebox.value == "") {
+        typebox.value = type;
+    } else {
         type = typebox.value;
     }
 
@@ -186,7 +251,6 @@ function to_dcc() {
     if (dcc_status == 0) {
         cc_type.style.backgroundColor = LBLUE;
         dcc_type.style.backgroundColor = LBLUE;
-        typebox.value = type;
         document.getElementById("dcc_lab_env").value = result[1];
         document.getElementById("dcc_env").value = result[2];
         document.getElementById("dcc_term").value = result[3];
@@ -200,6 +264,7 @@ function to_dcc() {
     }
 }
 
+// back_transform: string*4 -> {env, type, term, err : string}
 function to_cc() {
     var labbox = document.getElementById("dcc_lab_env");
     var envbox = document.getElementById("dcc_env");
@@ -208,14 +273,37 @@ function to_cc() {
 
     var env = "[" + envbox.value + "]";
     var defs = "[" + labbox.value + "]";
-    var type = typebox.value
-    if (type == "") {
-        type = dcc_infer(env, termbox.value);
+
+    // Transformation is only defined for well-typed terms.
+    // Checks if the input term is well-typed.
+
+    var type = dcc_infer(defs, env, termbox.value);
+    if (dcc_status != 0){
+        dcc_type.style.backgroundColor = RED;
+        typebox.value = "Back transformation: cannot transform ill-typed terms\n" + type;
+        return
+    }
+
+    // If there is an input type, check if it matches the inferred type.
+    // If not, does not transform, but hint that the type can be inferred.
+    if ((typebox.value != "") && (!dcc_check(defs, env, termbox.value, typebox.value))) {
+        dcc_type.style.backgroundColor = RED;
+        typebox.value = 
+            "Back transformation: input type does not match the inferred type of input term\n" 
+            + "Did you mean this type?\n" + type;
+        return
+    }
+
+    if (typebox.value == "") {
+        typebox.value = type;
+    } else {
+        type = typebox.value;
     }
 
     var result = back_transform(defs, env, termbox.value, type);
-    if (cc_status == 0) {
+    if (dcc_status == 0) {
         cc_type.style.backgroundColor = LBLUE;
+        dcc_type.style.backgroundColor = LBLUE;
         document.getElementById("cc_env").value = result[1];
         document.getElementById("cc_term").value = result[2];
         document.getElementById("cc_type").value = result[3];
