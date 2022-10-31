@@ -7,6 +7,10 @@ td {
 	border: 1px solid black;
 }
 
+.example {
+	cursor: grab;
+}
+
 textarea {
 	width: 500px;
 	height: 90px;

@@ -315,4 +315,17 @@ function to_cc() {
     }
 }
 
+function load_cc(env, term, type) {
+    // load example texts
+    document.getElementById("cc_env").value = env;
+    document.getElementById("cc_term").value = term;
+    document.getElementById("cc_type").value = type;
+
+    // clear dcc texts
+    document.getElementById("dcc_lab_env").value = "";
+    document.getElementById("dcc_env").value = "";
+    document.getElementById("dcc_term").value = "";
+    document.getElementById("dcc_type").value = "";
+}
+
 

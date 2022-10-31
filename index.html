@@ -62,5 +62,29 @@
 				</td>
 			</tr>
 		</table>
+
+		<table style="width: 95%; text-align: center; margin: auto; table-layout: fixed;">
+			<tr>
+				<td colspan = 5> Examples </td>
+			</tr>
+			<tr>
+				<td class="example" onclick="load_cc('', '\\A:U0. \\x:A. x', '')"> 
+					Identity 
+				</td>
+				<td class="example" onclick="load_cc('', '(\\A:U0. \\x:A. x) Unit ()', '')"> 
+					Identity application
+				</td>
+				<td class="example" onclick="load_cc('', '\\A:U0. \\B:(Pi x:A. U0). \\C:(Pi x:A. Pi y:B x. U0).\n\\g:(Pi x:A. Pi y:B x. C x y).\n\\f:(Pi x:A. B x).\n\\x:A. g x (f x)', '')"> 
+					Composition 
+				</td>
+				<td class="example" onclick="load_cc('N:U0, z:N, suc:Pi x:N.N,\nFin:Pi x:N.U0, fzero:Fin (suc z), fsuc:Pi x:N. (Pi n:Fin x. Fin (suc x)),\nx:N, f:Fin (suc x)', '\\y:N.f', '')"> 
+					Fin 
+				</td>
+				<td class="example" onclick="load_cc('N:U0, z:N, suc:Pi x:N.N,\nA:Pi f:(Pi x:N.N). U0,\na:Pi f:(Pi x:N.N). A (\\n:N.suc (f n))', 'a (\\x:N. suc x)', '')"> 
+					New function in type  
+				</td>
+			</tr>
+		</table>
+
 	</body>
 </html>
