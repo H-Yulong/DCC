@@ -73,13 +73,13 @@ rule main = parse
 | "\226\134\146"                    { ARROW (info lexbuf) }
 | "."                               { DOT (info lexbuf) }
 | ":"                               { COLON (info lexbuf) } 
-| ";"                               { SEMICOLON (info lexbuf) } 
 | "("                               { LPAREN (info lexbuf) }
 | ")"                               { RPAREN (info lexbuf) }
 | "["                               { LSQUARE (info lexbuf) }
 | "]"                               { RSQUARE (info lexbuf) }
 | "{"                               { LBRACE (info lexbuf) }
 | "}"                               { RBRACE (info lexbuf) }
+| "@"                               { AT (info lexbuf) }
 | ","                               { COMMA (info lexbuf) }
 | lident as var                     { Var {i=info lexbuf;v=var} } 
 | uident as var                     { Var {i=info lexbuf;v=var} }

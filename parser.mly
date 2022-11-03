@@ -19,7 +19,7 @@ open Err.Error
 %token <Err.Error.info> ARROW
 %token <Err.Error.info> COMMA
 %token <Err.Error.info> COLON
-%token <Err.Error.info> SEMICOLON
+%token <Err.Error.info> AT
 %token <Err.Error.info> LAM
 %token <Err.Error.info> DOT
 %token <Err.Error.info> PI
@@ -88,7 +88,7 @@ DCCLab:
 
 DCCApp:
   | DCCAtomic                                    { $1 }
-  | DCCApp DCCAtomic                             { DCC.Apply ($1, $2) }
+  | DCCApp AT DCCAtomic                          { DCC.Apply ($1, $3) }
 
 DCCAtomic: 
   | LPAREN DCCExpr RPAREN                        { $2 }
@@ -123,7 +123,7 @@ DCCLabEnvList:
   { (DCC.Lab $1.v, $3) :: $6 }
 
 DCCDefItem:
-  | Var COLON DCCExpr ARROW DCCExpr COLON DCCExpr                   
-  { DCC.mk_def [] (DCC.String $1.v) $3 $7 $5 }
-  | DCCEnvList SEMICOLON Var COLON DCCExpr ARROW DCCExpr COLON DCCExpr 
-  { DCC.mk_def $1 (DCC.String $3.v) $5 $9 $7 }
+  | LBRACE RBRACE COMMA Var COLON DCCExpr ARROW DCCExpr COLON DCCExpr                   
+  { DCC.mk_def [] (DCC.String $4.v) $6 $10 $8 }
+  | LBRACE DCCEnvList RBRACE COMMA Var COLON DCCExpr ARROW DCCExpr COLON DCCExpr 
+  { DCC.mk_def $2 (DCC.String $5.v) $7 $11 $9 }

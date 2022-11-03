@@ -70,14 +70,14 @@ module DCC = struct
 		| Var x -> print_var x
 		| Universe i -> "U" ^ (string_of_int i)
 		| Pi (x, t, e) -> Printf.sprintf "\206\160%s:%s.%s" (print_var x) (print_paren t) (pprint e)
-		| Apply (e1, e2) -> Printf.sprintf "%s %s" (print_paren e1) (print_paren e2)
+		| Apply (e1, e2) -> Printf.sprintf "%s @ %s" (print_paren e1) (print_paren e2)
 		| Label (lab, es) -> Printf.sprintf "%s{%s}" (print_lab lab) (pprint_list es)
 		| Unit -> "()"
     | UnitType -> "Unit"
 
     (* For wrapping parenthesis resonably *)
   and print_paren exp = match exp with
-    | Apply (e1, e2) -> Printf.sprintf "(%s %s)" (print_paren e1) (print_paren e2)
+    | Apply (e1, e2) -> Printf.sprintf "(%s @ %s)" (print_paren e1) (print_paren e2)
     | Pi (x, t, e) -> "(" ^ pprint (Pi (x, t, e)) ^ ")"
     | _ -> pprint exp
 
@@ -92,14 +92,7 @@ module DCC = struct
    	| (x, e) :: (e2 :: es) -> Printf.sprintf "%s:%s, %s" (print_var x) (pprint e) (print_env (e2 :: es))
 
    let print_lab_def d =
-   	if d.fvs == [] then
-	   	Printf.sprintf "(%s:%s \226\134\146 %s:%s)" 
-	   	(print_var d.var)
-	   	(pprint d.dom)
-	   	(pprint d.expr)
-	   	(pprint d.cod)
-   	else
-	   	Printf.sprintf "(%s ; %s:%s \226\134\146 %s:%s)" 
+	   	Printf.sprintf "({%s}, %s:%s \226\134\146 %s:%s)"
 	   	(print_env d.fvs)
 	   	(print_var d.var)
 	   	(pprint d.dom)
