@@ -68,6 +68,8 @@ rule main = parse
 | "\206\187"                        { LAM (info lexbuf) }
 | "\\lambda"                        { LAM (info lexbuf) }
 | "\\lam"                           { LAM (info lexbuf) }
+| "let"                             { LET (info lexbuf) }
+| "in"                              { IN (info lexbuf) }
 | "Unit"                            { UnitType (info lexbuf) }
 | "->"                              { ARROW (info lexbuf) }
 | "\226\134\146"                    { ARROW (info lexbuf) }
@@ -81,6 +83,7 @@ rule main = parse
 | "}"                               { RBRACE (info lexbuf) }
 | "@"                               { AT (info lexbuf) }
 | ","                               { COMMA (info lexbuf) }
+| "="                               { EQ (info lexbuf) }
 | lident as var                     { Var {i=info lexbuf;v=var} } 
 | uident as var                     { Var {i=info lexbuf;v=var} }
 | eof                               { EOF (info lexbuf) }

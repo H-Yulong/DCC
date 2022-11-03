@@ -23,6 +23,9 @@ open Err.Error
 %token <Err.Error.info> LAM
 %token <Err.Error.info> DOT
 %token <Err.Error.info> PI
+%token <Err.Error.info> LET
+%token <Err.Error.info> IN
+%token <Err.Error.info> EQ
 %token <Err.Error.info> LPAREN
 %token <Err.Error.info> RPAREN
 %token <Err.Error.info> LSQUARE
@@ -40,7 +43,7 @@ open Err.Error
 %type <(DCC.variable * DCC.expr) list> dcc_env
 %type <(DCC.label * DCC.defItem) list> dcc_lab_env
 %%
-
+  
 cc_expr:
   | CCExpr EOF                                   { $1 }
 
@@ -48,6 +51,8 @@ CCExpr:
   | CCApp                                        { $1 }
   | LAM Var COLON CCExpr DOT CCExpr              { CC.Lambda (CC.String $2.v, $4, $6) }
   | PI Var COLON CCExpr DOT CCExpr               { CC.Pi (CC.String $2.v, $4, $6) }
+  | CCAtomic ARROW CCExpr                        { CC.Pi (CC.String "_", $1, $3) }
+  | LET Var EQ CCExpr IN CCExpr                  { CC.subst [(CC.String $2.v, $4)] $6 }
 
 CCApp:
   | CCAtomic                                     { $1 }
