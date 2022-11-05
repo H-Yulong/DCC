@@ -84,6 +84,14 @@
 					New function in type  
 				</td>
 			</tr>
+			<tr>
+				<td class="example" onclick="load_cc('A : (Unit -> Unit) -> U0,\na : Pi f:(Unit -> Unit). A (\\x : Unit. f x)', 'a', 'Pi f:(Unit -> Unit).A f')"> 
+					Eta-equivalence 
+				</td>
+				<td class="example" onclick="load_cc('', 'let pair =\n \\A:U0.\\B:(A -> U0).\\x:A.\\y:(B x).\n \\K:U0.\\k:(Pi x:A.(B x) -> K).k x y\nin\n pair', 'let Sigma =\n \\A:U0.\\B:(A -> U0). Pi K:U0.(Pi x:A.(B x) -> K) -> K\nin\n Pi A:U0. Pi B:(A -> U0). Pi x:A. Pi y:(B x).\n (Sigma A B)')"> 
+					Dependent pair 
+				</td>
+			</tr>
 		</table>
 
 	</body>
