@@ -93,6 +93,34 @@
 				</td>
 			</tr>
 		</table>
-
+		
+	<div style="width: 95%; margin: auto;">
+		<h2 style="text-align: center;"> Syntax </h2>
+		<b> Variables and universes </b><br> 
+			Variable names may use lower- and upper-case letters, numbers, underscores(<code>_</code>), and quotation marks(<code>'</code>), and must begin with a letter. <br>
+			Universes are <code>U0, U1,</code> etc.
+		<br><br>
+		<b> Pi types </b><br> 
+			Pi types are <code>Pi x:A.M</code>. Write <code> A -> B </code>for non-dependent types, which are interpreted as <code> Pi _:A.B</code>.
+		<br><br>
+		<b> Lambdas and applications </b><br> 
+			Lambda abstractions are <code>\x:A.M</code>. Applications in CC are <code>M N</code>; applications in DCC are <code>M @ N</code>. 
+		<br><br>
+		<b> Type contexts </b><br> 
+			Type contexts are <code>x1:A1, x2:A2, ... , xn:An</code>.
+		<br><br>
+		<b> Label contexts </b><br> 
+			An entry in the label context is <code>L({x1:A1, ... , xn:An}, x:A -> M:B)</code>.
+			Entries in the label context are separated with commas.
+		<br><br>
+		<b> Unicode </b><br> 
+			Support <code> λ, Π, → </code> for <code> \, Pi, -> </code>.
+		<br><br>
+		<b> Let-bindings </b><br> 
+			An experimental let-binding syntax <code>let x=M in N</code> is supported for illustration purpose. <br>
+			Note: the let-binding is interpreted as <code>N[M/x]</code>, 
+			so, it might accept nonsense programs like <code>let x=nonsense in U0</code>. 
+		<br><br>
+	</div>
 	</body>
 </html>
