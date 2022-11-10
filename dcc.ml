@@ -95,9 +95,9 @@ module DCC = struct
 	   	Printf.sprintf "({%s}, %s:%s \226\134\146 %s:%s)"
 	   	(print_env d.fvs)
 	   	(print_var d.var)
-	   	(pprint d.dom)
+	   	(print_paren d.dom)
 	   	(pprint d.expr)
-	   	(pprint d.cod)
+	   	(print_paren d.cod)
 
    let rec print_lab_env = function 
    	| [] -> ""
