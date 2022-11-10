@@ -74,19 +74,22 @@
 				<td class="example" onclick="load_cc('', '(\\A:U0. \\x:A. x) Unit ()', '')"> 
 					Identity application
 				</td>
+				<td class="example" onclick="load_cc('A:U0, B:U0, C:U0', '\\f:(B->C).\\g:(A->B).\\x:A.f (g x)', '')"> 
+					Non-dependent composition 
+				</td>
 				<td class="example" onclick="load_cc('', '\\A:U0. \\B:(A -> U0). \\C:(Pi x:A. (B x) -> U0).\n\\f:(Pi x:A. Pi y:B x. C x y).\n\\g:(Pi x:A. B x).\n\\x:A. f x (g x)', '')"> 
-					Composition 
+					Fully-dependent composition 
 				</td>
-				<td class="example" onclick="load_cc('N:U0, z:N, suc:N -> N,\nFin:N -> U0, fzero:Fin (suc z), fsuc:Pi x:N.(Fin x) -> Fin (suc x),\nx:N, f:Fin (suc x)', '\\y:N.f', '')"> 
-					Fin 
-				</td>
-				<td class="example" onclick="load_cc('N:U0, z:N, suc:N -> N,\nA:Pi f:N -> N. U0,\na:Pi f:N -> N. A (\\n:N.suc (f n))', 'a (\\x:N. suc x)', '')"> 
-					New function in type  
+				<td class="example" onclick="load_cc('A : (Unit -> Unit) -> U0,\na : Pi f:(Unit -> Unit). A (\\x : Unit. f x)', 'a', 'Pi f:(Unit -> Unit).A f')"> 
+					Eta-equivalence 
 				</td>
 			</tr>
 			<tr>
-				<td class="example" onclick="load_cc('A : (Unit -> Unit) -> U0,\na : Pi f:(Unit -> Unit). A (\\x : Unit. f x)', 'a', 'Pi f:(Unit -> Unit).A f')"> 
-					Eta-equivalence 
+				<td class="example" onclick="load_cc('N:U0, z:N, suc:N -> N,\nFin:N -> U0, fzero:Fin (suc z), fsuc:Pi x:N.(Fin x) -> Fin (suc x),\nx:N, f:Fin (suc x)', '\\y:N.f', '')"> 
+					Free-variables in types 
+				</td>
+				<td class="example" onclick="load_cc('N:U0, z:N, suc:N -> N,\nA:Pi f:N -> N. U0,\na:Pi f:N -> N. A (\\n:N.suc (f n))', 'a (\\x:N. suc x)', '')"> 
+					New function in type  
 				</td>
 				<td class="example" onclick="load_cc('', 'let pair =\n \\A:U0.\\B:(A -> U0).\\x:A.\\y:(B x).\n \\K:U0.\\k:(Pi x:A.(B x) -> K).k x y\nin\n pair', 'let Sigma =\n \\A:U0.\\B:(A -> U0). Pi K:U0.(Pi x:A.(B x) -> K) -> K\nin\n Pi A:U0. Pi B:(A -> U0). Pi x:A. Pi y:(B x).\n (Sigma A B)')"> 
 					Dependent pair 
