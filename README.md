@@ -41,6 +41,9 @@ You can find a documentation on the syntax of both languages at the bottom of th
 *Universes* &emsp;
 Universes are `U0`, `U1`, `U2`, etc.
 
+*Unit type* &emsp;
+We have a built-in unit type `Unit` and the unit value `()`.
+
 *Variables* &emsp; 
 We use named variables and the names are implemented as strings. 
 A variable binds to the cloest binder that gives the same name.
@@ -89,6 +92,66 @@ We support the following unicode alternatives.
 |Pi | Π |
 |-> | → |
 
+### Example: New functions in the type
+
+In §3.3 we provided an example of functions appearing in the type of an expression,
+even if the context and the expression itself do not contain that function. Namely,
+```
+    Γ ≜ ·, 𝐴: (𝑁𝑎𝑡 → 𝑁𝑎𝑡) → 𝑈0, 𝑎 : Π𝑓 : (𝑁𝑎𝑡 → 𝑁𝑎𝑡).𝐴 (𝜆𝑛 :𝑁𝑎𝑡 .1 + (𝑓 𝑛))
+    𝑀 ≜ 𝑎 (𝜆𝑥 :𝑁𝑎𝑡 .1 + 𝑥)
+    𝑁 ≜ 𝐴 (𝜆𝑛 :𝑁𝑎𝑡 .2 + 𝑛)
+```
+We have Γ ⊢ 𝑀 : 𝑁, because the inferred type of 𝑀 is (according to rule *D-Ty-Apply*)
+
+    (𝐴 (𝜆𝑛 :𝑁𝑎𝑡 .1 + (𝑓 𝑛)))[(𝜆𝑥 :𝑁𝑎𝑡 .1 + 𝑥)/𝑓]
+
+and reduces to
+
+    𝐴 (𝜆𝑛 :𝑁𝑎𝑡 .2 + 𝑛).
+
+So, the type of 𝑀 contains a new function that does not exist in the
+context Γ or the term 𝑀. We can replicate this example in our implementation.
+
+1. The implementation does not have built-in natural numbers, but we can provide
+   an abstract signature of the natural number type, zero, and suc in 
+   the source-language context.
+```
+N:U0, z:N, suc:N -> N,
+```
+
+2. Now, we input our example. We have 
+```
+A:Pi f:N -> N. U0,
+a:Pi f:N -> N. A (\n:N.suc (f n))
+```
+in the context and 
+```
+a (\x:N. suc x)
+```
+as the term.
+
+3. Clicking the source-language "Infer type" would give us the inferred and normalized
+   type of our term, `A (λn:N. suc (suc n))`.
+
+The above example is also available under the name "New functions in type" on the webpage.
+
+### Build instructions
+
+The implementation of our defunctionalizatin transformation is written in OCaml
+and compiled to JavaScript with the `js_of_ocaml` package. We have included the
+compiled JavaScript file `jsmain.js` in the repository, along with the corresponding
+OCaml source code.
+
+If you have installed OCaml, you can rebuild/modify the implementation with the following
+commands.
+
+- To compile/recompile `jsmain.js`, run `make all`. 
+  Please make sure you have installed OCaml packages `menhir` and `js_of_ocaml` 
+  (you can install them from `opam`).
+
+- To clean the make files, run `make clean`.
+
+- To rebuild the dependency graph, run `make depend`.
 
 ### Type checking
 
