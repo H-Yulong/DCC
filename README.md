@@ -165,12 +165,12 @@ L2({N:U0, suc:Π_:N.N}, n:N → suc @ (suc @ n):N)
 ```
 The four labels have the following correspondence.
 
-    | Label | Corresponding lambda | From |
-    | ----- | -------------------- | ---- |
-    | `L0` | `(\n:N.suc (f n))` | Context |
-    | `L1` | `(\x:N. suc x)` | Term |
-    | `L3` | `(\𝑛 :𝑁𝑎𝑡 .1 + ((\𝑥 :𝑁𝑎𝑡 .1 + 𝑥) 𝑛))` | Inferred, un-normalized type |
-    | `L2` | `(λn:N. suc (suc n))` | Inferred, normalized type |
+| Label | Corresponding lambda | From |
+| ----- | -------------------- | ---- |
+| `L0` | `\n:N.suc (f n)` | Context |
+| `L1` | `\x:N. suc x` | Term |
+| `L3` | `\n:N. suc ((\x:N. suc x) n)` | Inferred, un-normalized type |
+| `L2` | `\n:N. suc (suc n)` | Inferred, normalized type |
 
 5. The source-language type expression is transformed to `A @ L2{N, suc}`, and we can
 click "Type check" to verify that the transformed term has this type, i.e. 
@@ -179,7 +179,7 @@ inferred but not normalized type of the expression, the term should also type ch
 with `A @ L3{N, suc}`.
 
 6. Note that the new function appeared in the type derivation is essentially
-`(\n:N.suc (f n))` with the free variable `f` substituted by `(\x:N. suc x)`, 
+`\n:N.suc (f n)` with the free variable `f` substituted by `\x:N. suc x`, 
 which corresponds to `L0{N, suc, L1{N, suc}}` in DCC. 
 Indeed, the transformed term type checks with `A @ L0{N, suc, L1{N, suc}}`.
 This implies that, `L2{N, suc}`, `L3{N, suc}`, and `L0{N, suc, L1{N, suc}}` 
