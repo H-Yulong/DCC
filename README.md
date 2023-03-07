@@ -29,8 +29,19 @@ The target-language part (right column) should show the resulting label context,
 type context, term, and type in target language.
 7. Use "Type check" and "Normalize" to verify that the transformation preserves
 types and reduction behaviors. The transformed term should type check and reduce to `()`.
+8. Use "Transform to CC" to perform the backward transformation
+(You may want to delete the contents in the source-language term and type textbox first).
+In this case, the result term should be `((λA:U0. λx:A. x) Unit) ()`
+and the result type should be `Unit`.
 
 Apart from the examples, you can also write your own terms in the source and the target language, then normalize/type-check/transform them. 
+For instance, start with the fully-dependent composition function in Section 3.1.
+```
+\A:U0. \B:(A -> U0). \C:(Pi x:A. (B x) -> U0).
+\f:(Pi x:A. Pi y:B x. C x y).
+\g:(Pi x:A. B x).
+\x:A. f x (g x)
+```
 If anything fails, the output box should turn red and show an error message.
 You can find a documentation on the syntax of both languages at the bottom of the webpage or in the next section.
 
@@ -45,7 +56,7 @@ Universes are `U0`, `U1`, `U2`, etc.
 We have a built-in unit type `Unit` and the unit value `()`.
 
 *Variables* &emsp; 
-We use named variables and the names are implemented as strings. 
+We use named variables. 
 A variable binds to the cloest binder that gives the same name.
 For example, the variable `x` in `\x:U0. \x:U1. x` binds to the inner lambda, 
 so, `x` has type `U1` and the inferred type of this expression is `Pi x:U0. Pi x:U1. U1`.
