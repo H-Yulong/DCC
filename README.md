@@ -28,13 +28,16 @@ The output textbox should turn green, meaning that it type-checks.
 The target-language part (right column) should show the resulting label context,
 type context, term, and type in target language.
 7. Use "Type check" and "Normalize" to verify that the transformation preserves
-types and reduction behaviors. The transformed term should type check and reduce to `()`.
+types and reduction behaviors. 
+The transformed term should type check and reduce to `()`, since the transformation is
+type-preserving (Theorem 3.16) and correct (Corollary 3.13).
 8. Use "Transform to CC" to perform the backward transformation
 (You may want to delete the contents in the source-language term and type textbox first).
 In this case, the result term should be `((λA:U0. λx:A. x) Unit) ()`
 and the result type should be `Unit`.
 
-Apart from the examples, you can also write your own terms in the source and the target language, then normalize/type-check/transform them. 
+Apart from the examples, you can also write your own terms in the source and the target language, 
+then normalize/type-check/transform them, and witness type-preservation and correctness of the transformation.
 For instance, start with the fully-dependent composition function in Section 3.1.
 ```
 \A:U0. \B:(A -> U0). \C:(Pi x:A. (B x) -> U0).
@@ -118,12 +121,17 @@ We have Γ ⊢ 𝑀 : 𝑁, because the inferred type of 𝑀 is (according to r
 
     (𝐴 (𝜆𝑛 :𝑁𝑎𝑡 .1 + (𝑓 𝑛)))[(𝜆𝑥 :𝑁𝑎𝑡 .1 + 𝑥)/𝑓]
 
-and reduces to
+which is 
+
+    𝐴 (𝜆𝑛 :𝑁𝑎𝑡 .1 + ((𝜆𝑥 :𝑁𝑎𝑡 .1 + 𝑥) 𝑛))
+
+after the substitution, and it reduces to
 
     𝐴 (𝜆𝑛 :𝑁𝑎𝑡 .2 + 𝑛).
 
 So, the type of 𝑀 contains a new function that does not exist in the
-context Γ or the term 𝑀. We can replicate this example in our implementation.
+context Γ or the term 𝑀. We can replicate this example in our implementation
+(It is also available under the name "New functions in type" on the webpage).
 
 1. The implementation does not have built-in natural numbers, but we can provide
    an abstract signature of the natural number type, zero, and suc in 
@@ -146,7 +154,49 @@ as the term.
 3. Clicking the source-language "Infer type" would give us the inferred and normalized
    type of our term, `A (λn:N. suc (suc n))`.
 
-The above example is also available under the name "New functions in type" on the webpage.
+4. Click "Transform to DCC" to defunctionalize the example. There should be 4 functions
+in the target language's label context
+```
+L0({N:U0, suc:Π_:N.N, f:Π_:N.N}, n:N → suc @ (f @ n):N), 
+L1({N:U0, suc:Π_:N.N}, x:N → suc @ x:N),
+L3({N:U0, suc:Π_:N.N}, n:N → suc @ (L1{N, suc} @ n):N),
+L2({N:U0, suc:Π_:N.N}, n:N → suc @ (suc @ n):N)
+```
+`L0` corresponds to `(\n:N.suc (f n))` in the context;
+`L1` corresponds to `(\x:N. suc x)` in the term;
+`L3` corresponds to `(\𝑛 :𝑁𝑎𝑡 .1 + ((\𝑥 :𝑁𝑎𝑡 .1 + 𝑥) 𝑛))`, 
+the (un-normalized) new function that appears in the type;
+finally, `L2` corresponds to `(λn:N. suc (suc n))` in the normalized type expression.
+
+4. Click "Transform to DCC" to defunctionalize the example. There should be 4 functions
+in the target language's label context
+```
+L0({N:U0, suc:Π_:N.N, f:Π_:N.N}, n:N → suc @ (f @ n):N), 
+L1({N:U0, suc:Π_:N.N}, x:N → suc @ x:N),
+L3({N:U0, suc:Π_:N.N}, n:N → suc @ (L1{N, suc} @ n):N),
+L2({N:U0, suc:Π_:N.N}, n:N → suc @ (suc @ n):N)
+```
+`L0` corresponds to `(\n:N.suc (f n))` in the context;
+`L1` corresponds to `(\x:N. suc x)` in the term;
+`L3` corresponds to `(\𝑛 :𝑁𝑎𝑡 .1 + ((\𝑥 :𝑁𝑎𝑡 .1 + 𝑥) 𝑛))`, 
+the (un-normalized) new function that appears in the type;
+finally, `L2` corresponds to `(λn:N. suc (suc n))` in the normalized type expression.
+
+5. The source-language type expression is transformed to `A @ L2{N, suc}`, and we can
+click "Type check" to verify that the transformed term has this type, i.e. 
+the transformation is type-preserving in this case. Since `L3` comes from the
+inferred but not normalized type of the expression, the term also type checks
+with `A @ L3{N, suc}`.
+
+6. Note that the new function appeared in the type derivation is essentially
+`(\n:N.suc (f n))` with the free variable `f` substituted by `(\x:N. suc x)`, 
+which corresponds to `L0{N, suc, L1{N, suc}}` in DCC. 
+Indeed, the transformed term type checks with `A @ L0{N, suc, L1{N, suc}}`.
+It implies that `L2{N, suc}`, `L3{N, suc}`, and `L0{N, suc, L1{N, suc}}` 
+are all equivalent in this particular DCC-context.
+
+### Example: Various weakenings
+
 
 ### Build instructions
 
@@ -165,21 +215,3 @@ commands.
 - To clean the make files, run `make clean`.
 
 - To rebuild the dependency graph, run `make depend`.
-
-### Type checking
-
-### Transformation
-
-> The Step by Step Instructions explain how to reproduce any experiments or other activities that support the conclusions in your paper. 
-
-> Write this for readers who have a deep interest in your work and are studying it to improve it or compare against it. If your artifact runs for more than a few minutes, point this out and explain how to run it on smaller inputs.
-
-> Where appropriate, include descriptions of and links to files (included in the archive) that represent expected outputs (e.g., the log files expected to be generated by your tool on the given inputs); if there are warnings that are safe to be ignored, explain which ones they are.
-
-
-
-
-
-
-
-
