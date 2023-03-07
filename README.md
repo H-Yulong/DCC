@@ -89,9 +89,11 @@ Note that `x1, ... , xn` and `x` are bound in `M`;
 *Syntactic sugar* &emsp;
 We support writing `A -> B` for non-dependent functions, 
 which is interpreted as `Pi _:A.B`.
+We allow a trailing comma at the end of non-empty lists of expressions,
+like `x1:A1, ..., xn:An,` in contexts or `L0{x, y, z,}` in labels. 
 We also have an experimental let-binding syntax `let x=M in N`
-for illustration purpose.
-The let-binding is interpreted as `N[M/x]` (substitute x by M in N), 
+for illustration purpose, and it is *not* a part of the formal syntax.
+The let-binding is de-sugared as `N[M/x]` (substitute x by M in N), 
 so, it could accept ill-typed programs like `let x=nonsense in U0`.
 
 *Unicode* &emsp;

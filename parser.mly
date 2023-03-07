@@ -74,6 +74,7 @@ CCEnv:
 
 CCEnvList:
   | Var COLON CCExpr                             { [(CC.String $1.v, $3)] }
+  | Var COLON CCExpr COMMA                       { [(CC.String $1.v, $3)] }
   | Var COLON CCExpr COMMA CCEnvList             { (CC.String $1.v, $3) :: $5 }
 
 dcc_expr:
@@ -85,6 +86,7 @@ DCCExpr:
 
 DCCExprList:
   | DCCExpr                                      { [$1] }
+  | DCCExpr COMMA                                { [$1] }
   | DCCExpr COMMA DCCExprList                    { $1 :: $3 }
 
 DCCLab:
@@ -112,6 +114,7 @@ DCCEnv:
 
 DCCEnvList:
   | Var COLON DCCExpr                            { [(DCC.String $1.v, $3)] }
+  | Var COLON DCCExpr COMMA                      { [(DCC.String $1.v, $3)] }
   | Var COLON DCCExpr COMMA DCCEnvList           { (DCC.String $1.v, $3) :: $5 }
 
 dcc_lab_env:
@@ -123,6 +126,8 @@ DCCLabEnv:
 
 DCCLabEnvList:
   | Var LPAREN DCCDefItem RPAREN                               
+  { [(DCC.Lab $1.v, $3)] }
+  | Var LPAREN DCCDefItem RPAREN COMMA                               
   { [(DCC.Lab $1.v, $3)] }
   | Var LPAREN DCCDefItem RPAREN COMMA DCCLabEnvList
   { (DCC.Lab $1.v, $3) :: $6 }
