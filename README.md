@@ -59,7 +59,8 @@ Universes are `U0`, `U1`, `U2`, etc.
 We have a built-in unit type `Unit` and the unit value `()`.
 
 *Variables* &emsp; 
-We use named variables. 
+We use named variables and names may contain lower- and upper-case letters, 
+numbers, underscores, and quotation marks, and must begin with a letter.
 A variable binds to the cloest binder that gives the same name.
 For example, the variable `x` in `\x:U0. \x:U1. x` binds to the inner lambda, 
 so, `x` has type `U1` and the inferred type of this expression is `Pi x:U0. Pi x:U1. U1`.
@@ -155,44 +156,33 @@ as the term.
    type of our term, `A (λn:N. suc (suc n))`.
 
 4. Click "Transform to DCC" to defunctionalize the example. There should be 4 functions
-in the target language's label context
+in the target language's label context.
 ```
 L0({N:U0, suc:Π_:N.N, f:Π_:N.N}, n:N → suc @ (f @ n):N), 
 L1({N:U0, suc:Π_:N.N}, x:N → suc @ x:N),
 L3({N:U0, suc:Π_:N.N}, n:N → suc @ (L1{N, suc} @ n):N),
 L2({N:U0, suc:Π_:N.N}, n:N → suc @ (suc @ n):N)
 ```
-`L0` corresponds to `(\n:N.suc (f n))` in the context;
-`L1` corresponds to `(\x:N. suc x)` in the term;
-`L3` corresponds to `(\𝑛 :𝑁𝑎𝑡 .1 + ((\𝑥 :𝑁𝑎𝑡 .1 + 𝑥) 𝑛))`, 
-the (un-normalized) new function that appears in the type;
-finally, `L2` corresponds to `(λn:N. suc (suc n))` in the normalized type expression.
+The four labels have the following correspondence.
 
-4. Click "Transform to DCC" to defunctionalize the example. There should be 4 functions
-in the target language's label context
-```
-L0({N:U0, suc:Π_:N.N, f:Π_:N.N}, n:N → suc @ (f @ n):N), 
-L1({N:U0, suc:Π_:N.N}, x:N → suc @ x:N),
-L3({N:U0, suc:Π_:N.N}, n:N → suc @ (L1{N, suc} @ n):N),
-L2({N:U0, suc:Π_:N.N}, n:N → suc @ (suc @ n):N)
-```
-`L0` corresponds to `(\n:N.suc (f n))` in the context;
-`L1` corresponds to `(\x:N. suc x)` in the term;
-`L3` corresponds to `(\𝑛 :𝑁𝑎𝑡 .1 + ((\𝑥 :𝑁𝑎𝑡 .1 + 𝑥) 𝑛))`, 
-the (un-normalized) new function that appears in the type;
-finally, `L2` corresponds to `(λn:N. suc (suc n))` in the normalized type expression.
+    | Label | Corresponding lambda | From |
+    | ----- | -------------------- | ---- |
+    | `L0` | `(\n:N.suc (f n))` | Context |
+    | `L1` | `(\x:N. suc x)` | Term |
+    | `L3` | `(\𝑛 :𝑁𝑎𝑡 .1 + ((\𝑥 :𝑁𝑎𝑡 .1 + 𝑥) 𝑛))` | Inferred, un-normalized type |
+    | `L2` | `(λn:N. suc (suc n))` | Inferred, normalized type |
 
 5. The source-language type expression is transformed to `A @ L2{N, suc}`, and we can
 click "Type check" to verify that the transformed term has this type, i.e. 
 the transformation is type-preserving in this case. Since `L3` comes from the
-inferred but not normalized type of the expression, the term also type checks
+inferred but not normalized type of the expression, the term should also type check
 with `A @ L3{N, suc}`.
 
 6. Note that the new function appeared in the type derivation is essentially
 `(\n:N.suc (f n))` with the free variable `f` substituted by `(\x:N. suc x)`, 
 which corresponds to `L0{N, suc, L1{N, suc}}` in DCC. 
 Indeed, the transformed term type checks with `A @ L0{N, suc, L1{N, suc}}`.
-It implies that `L2{N, suc}`, `L3{N, suc}`, and `L0{N, suc, L1{N, suc}}` 
+This implies that, `L2{N, suc}`, `L3{N, suc}`, and `L0{N, suc, L1{N, suc}}` 
 are all equivalent in this particular DCC-context.
 
 ### Example: Various weakenings
