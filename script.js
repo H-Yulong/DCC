@@ -316,6 +316,8 @@ function to_cc() {
 }
 
 function load_cc(env, term, type) {
+    reset_colours();
+
     // load example texts
     document.getElementById("cc_env").value = env;
     document.getElementById("cc_term").value = term;
@@ -328,4 +330,10 @@ function load_cc(env, term, type) {
     document.getElementById("dcc_type").value = "";
 }
 
-
+function reset_colours() {
+    const elements = ["cc_env", "cc_term", "cc_type", "dcc_lab_env", "dcc_env", "dcc_term", "dcc_type"];
+    for (e of elements) {
+        console.log(e);
+        document.getElementById(e).style.backgroundColor = LBLUE;
+    }
+}
