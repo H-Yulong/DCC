@@ -197,7 +197,7 @@ are all equivalent in this particular DCC-context.
 
 ### Example: Weakenings
 
-The target context enjoys various *weakening* properties -
+The target language enjoys various *weakening* properties -
 a well-typed expression is still well-typed in an extended type or label context.
 We illustrate this property with the following example (Lemma 3.1, 3.2).
 
@@ -236,7 +236,7 @@ N({A:U0, f:A -> A}, x:A --> f @ x : A),
 L0({}, A:U0 --> L1{A}: A -> A)
 ```
 
-### Build instructions
+## Build instructions
 
 The implementation of our defunctionalizatin transformation is written in OCaml
 and compiled to JavaScript with the `js_of_ocaml` package. We have included the
