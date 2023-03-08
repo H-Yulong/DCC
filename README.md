@@ -189,6 +189,44 @@ are all equivalent in this particular DCC-context.
 
 ### Example: Weakenings
 
+The target context enjoys the *weakening* property -
+a well-typed expression is still well-typed in an extended type or label context.
+We illustrate this property with the following example (Lemma 3.1, 3.2).
+
+1. Click "Identity" to load the polymorphic identity function example. 
+Defunctionalize it with the "Transform to DCC" button. The resulting label context should be
+```
+L1({A:U0}, x:A → x:A),
+L0({}, A:U0 → L1{A}:(Πx:A.A))
+```
+and the type context is empty.
+The transformed term is `L0{}` and its type is `ΠA:U0.Πx:A.A`.
+We can verify that it type checks by clicking "Type check" on the target side.
+
+2. 
+Now, we weaken the target-language type context by adding variables like
+```
+A:U0, f:A -> A,
+B:A -> U0, g: Pi x:A. B @ x
+```
+Similarily, we can weaken the label context with (well-formed) new labels like
+```
+M({}, A:U0 --> A : U0),
+N({A:U0, f:A -> A}, x:A --> f @ x : A)
+```
+and it should still type check.
+
+3. We say that a label context `D1` is a *subset* of another label context `D2`
+if `D2` contains all label definitions that `D1` contains. This gives a stronger 
+weakening property: a well-typed expression is still well-typed in a larger label context.
+For example, our term is still well-typed in the following context.
+```
+M({}, A:U0 --> A : U0),
+L1({A:U0}, x:A --> x:A),
+N({A:U0, f:A -> A}, x:A --> f @ x : A),
+L0({}, A:U0 --> L1{A}: A -> A)
+```
+
 ### Build instructions
 
 The implementation of our defunctionalizatin transformation is written in OCaml
