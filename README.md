@@ -160,10 +160,10 @@ as the term.
 4. Click "Transform to DCC" to defunctionalize the example. There should be 4 functions
 in the target language's label context.
 ```
-L0({N:U0, suc:Π_:N.N, f:Π_:N.N}, n:N → suc @ (f @ n):N), 
-L1({N:U0, suc:Π_:N.N}, x:N → suc @ x:N),
-L3({N:U0, suc:Π_:N.N}, n:N → suc @ (L1{N, suc} @ n):N),
-L2({N:U0, suc:Π_:N.N}, n:N → suc @ (suc @ n):N)
+L0({N:U0, suc:Π_:N.N, f:Π_:N.N}, n:N ⟶ suc @ (f @ n):N),
+L1({N:U0, suc:Π_:N.N}, x:N ⟶ suc @ x:N),
+L3({N:U0, suc:Π_:N.N}, n:N ⟶ suc @ (L1{N, suc} @ n):N),
+L2({N:U0, suc:Π_:N.N}, n:N ⟶ suc @ (suc @ n):N)
 ```
 The four labels have the following correspondence.
 
@@ -196,15 +196,14 @@ We illustrate this property with the following example (Lemma 3.1, 3.2).
 1. Click "Identity" to load the polymorphic identity function example. 
 Defunctionalize it with the "Transform to DCC" button. The resulting label context should be
 ```
-L1({A:U0}, x:A → x:A),
-L0({}, A:U0 → L1{A}:(Πx:A.A))
+L1({A:U0}, x:A ⟶ x:A),
+L0({}, A:U0 ⟶ L1{A}:(Πx:A.A))
 ```
 and the type context is empty.
 The transformed term is `L0{}` and its type is `ΠA:U0.Πx:A.A`.
 We can verify that it type checks by clicking "Type check" on the target side.
 
-2. 
-Now, we weaken the target-language type context by adding variables like
+2. Now, we weaken the target-language type context by adding variables like
 ```
 A:U0, f:A -> A,
 B:A -> U0, g: Pi x:A. B @ x

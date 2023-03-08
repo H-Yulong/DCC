@@ -49,6 +49,6 @@ depend:: $(CORE) $(GENERATE)
 	ocamldep $(INCLUDE) *.mli *.ml > .depend
 
 clean:: 
-	rm -rf jsmain.js jsmain.byte *.cmi *.cmo lexer.ml parser.ml parser.mli \
+	rm -rf jsmain.js jsmain.byte *.cmi *.cmo lexer.ml lexer.mli parser.ml parser.mli \
 	   parser.output parser.automaton parser.conflicts parser.dot
 
