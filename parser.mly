@@ -17,6 +17,7 @@ open Err.Error
 %token <Err.Error.info> UnitType
 
 %token <Err.Error.info> ARROW
+%token <Err.Error.info> LONGARROW
 %token <Err.Error.info> COMMA
 %token <Err.Error.info> COLON
 %token <Err.Error.info> AT
@@ -83,6 +84,7 @@ dcc_expr:
 DCCExpr:
   | DCCApp                                       { $1 }
   | PI Var COLON DCCExpr DOT DCCExpr             { DCC.Pi (DCC.String $2.v, $4, $6) }
+  | DCCAtomic ARROW DCCExpr                      { DCC.Pi (DCC.String "_", $1, $3)  }
 
 DCCExprList:
   | DCCExpr                                      { [$1] }
@@ -133,7 +135,7 @@ DCCLabEnvList:
   { (DCC.Lab $1.v, $3) :: $6 }
 
 DCCDefItem:
-  | LBRACE RBRACE COMMA Var COLON DCCExpr ARROW DCCExpr COLON DCCExpr                   
+  | LBRACE RBRACE COMMA Var COLON DCCExpr LONGARROW DCCExpr COLON DCCExpr                   
   { DCC.mk_def [] (DCC.String $4.v) $6 $10 $8 }
-  | LBRACE DCCEnvList RBRACE COMMA Var COLON DCCExpr ARROW DCCExpr COLON DCCExpr 
+  | LBRACE DCCEnvList RBRACE COMMA Var COLON DCCExpr LONGARROW DCCExpr COLON DCCExpr 
   { DCC.mk_def $2 (DCC.String $5.v) $7 $11 $9 }

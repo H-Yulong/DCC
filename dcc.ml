@@ -92,7 +92,7 @@ module DCC = struct
    	| (x, e) :: (e2 :: es) -> Printf.sprintf "%s:%s, %s" (print_var x) (pprint e) (print_env (e2 :: es))
 
    let print_lab_def d =
-	   	Printf.sprintf "({%s}, %s:%s \226\134\146 %s:%s)"
+	   	Printf.sprintf "({%s}, %s:%s \226\159\182 %s:%s)"
 	   	(print_env d.fvs)
 	   	(print_var d.var)
 	   	(print_paren d.dom)

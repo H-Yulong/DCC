@@ -59,7 +59,8 @@ Universes are `U0`, `U1`, `U2`, etc.
 We have a built-in unit type `Unit` and the unit value `()`.
 
 *Variables* &emsp; 
-We use named variables and names may contain lower- and upper-case letters, 
+We use named variables.
+Names may contain lower- and upper-case letters, 
 numbers, underscores, and quotation marks, and must begin with a letter.
 A variable binds to the cloest binder that gives the same name.
 For example, the variable `x` in `\x:U0. \x:U1. x` binds to the inner lambda, 
@@ -82,7 +83,7 @@ Note that type contexts are telescopes, i.e. `x1, ... , xi` is bounded in `Ai+1`
 
 *Labels and label contexts* &emsp;
 A label context is a telescope of label definitions, separated with commas.
-Each definition has the form of `L({x1:A1, ... , xn:An}, x:A -> M:B)`, where
+Each definition has the form of `L({x1:A1, ... , xn:An}, x:A --> M:B)`, where
 `L` is the label name, 
 `{x1:A1, ... , xn:An}` is a type context (of the free variables in the closure),
 `x:A` is the bound variable of the closed function, and
@@ -108,6 +109,7 @@ We support the following unicode alternatives.
 | \ | λ |
 |Pi | Π |
 |-> | → |
+|-->| ⟶ |
 
 ### Example: New functions in the type
 
@@ -185,8 +187,7 @@ Indeed, the transformed term type checks with `A @ L0{N, suc, L1{N, suc}}`.
 This implies that, `L2{N, suc}`, `L3{N, suc}`, and `L0{N, suc, L1{N, suc}}` 
 are all equivalent in this particular DCC-context.
 
-### Example: Various weakenings
-
+### Example: Weakenings
 
 ### Build instructions
 

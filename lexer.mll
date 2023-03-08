@@ -73,6 +73,8 @@ rule main = parse
 | "Unit"                            { UnitType (info lexbuf) }
 | "->"                              { ARROW (info lexbuf) }
 | "\226\134\146"                    { ARROW (info lexbuf) }
+| "-->"                             { LONGARROW (info lexbuf) }
+| "\226\159\182"                    { LONGARROW (info lexbuf) }
 | "."                               { DOT (info lexbuf) }
 | ":"                               { COLON (info lexbuf) } 
 | "("                               { LPAREN (info lexbuf) }
