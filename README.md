@@ -10,7 +10,7 @@ dependent pairs and finite sets.
 
 ## Getting started guide
 
-Open `index.html` in a web browser. Then, you can use the following steps
+To start, open `index.html` with a web browser. Then, you can use the following steps
 to familiarize yourself with the implementation's functionalities.
 
 1. Click on the *Identity application* example to load it into the source-language part (left column)of the webpage.
@@ -46,9 +46,17 @@ For instance, start with the fully-dependent composition function in Section 3.1
 \x:A. f x (g x)
 ```
 If anything fails, the output box should turn red and show an error message.
-You can find a documentation on the syntax of both languages at the bottom of the webpage or in the next section.
 
 ## Step-by-Step Instructions
+
+We document the implementation's syntax in this section.
+Then, we give instructions on how to reproduce examples
+that support the claims we made in the paper.
+
+*Example: New functions in the type* shows that a function may appear in the type of an expression,
+even though the expression itself does not contain that function (Section 3.3).
+*Example: Weakenings* demonstrates various weakening properties of the target language
+(Lemma 3.1, 3.2, and 3.6).
 
 ### Syntax
 
@@ -184,12 +192,12 @@ with `A @ L3{N, suc}`.
 `\n:N.suc (f n)` with the free variable `f` substituted by `\x:N. suc x`, 
 which corresponds to `L0{N, suc, L1{N, suc}}` in DCC. 
 Indeed, the transformed term type checks with `A @ L0{N, suc, L1{N, suc}}`.
-This implies that, `L2{N, suc}`, `L3{N, suc}`, and `L0{N, suc, L1{N, suc}}` 
+In fact, `L2{N, suc}`, `L3{N, suc}`, and `L0{N, suc, L1{N, suc}}` 
 are all equivalent in this particular DCC-context.
 
 ### Example: Weakenings
 
-The target context enjoys the *weakening* property -
+The target context enjoys various *weakening* properties -
 a well-typed expression is still well-typed in an extended type or label context.
 We illustrate this property with the following example (Lemma 3.1, 3.2).
 
@@ -213,12 +221,14 @@ Similarily, we can weaken the label context with (well-formed) new labels like
 M({}, A:U0 --> A : U0),
 N({A:U0, f:A -> A}, x:A --> f @ x : A)
 ```
-and it should still type check.
+and it should still type check (Remember to add a comma after label `L0`!).
 
-3. We say that a label context `D1` is a *subset* of another label context `D2`
+3. We define that a label context `D1` is a *subset* of another label context `D2`
 if `D2` contains all label definitions that `D1` contains. This gives a stronger 
-weakening property: a well-typed expression is still well-typed in a larger label context.
-For example, our term is still well-typed in the following context.
+weakening property: if a term is well-typed in `D1 ; Γ` and `D1` is a subset of `D2`,
+then that term is also well-typed in `D2 ; Γ` (Lemma 3.6).
+For example, the original label context with just `L1` and `L0` is a subset of the following context,
+and our term is still well-typed in it.
 ```
 M({}, A:U0 --> A : U0),
 L1({A:U0}, x:A --> x:A),
@@ -233,7 +243,7 @@ and compiled to JavaScript with the `js_of_ocaml` package. We have included the
 compiled JavaScript file `jsmain.js` in the repository, along with the corresponding
 OCaml source code.
 
-If you have installed OCaml, you can rebuild/modify the implementation with the following
+If you have installed OCaml, you can rebuild the implementation with the following
 commands.
 
 - To compile/recompile `jsmain.js`, run `make all`. 
