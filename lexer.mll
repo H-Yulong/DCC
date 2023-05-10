@@ -6,8 +6,6 @@ open Err.Error
 
 exception Error of string
 
-let str_tail str = String.sub str 1 (String.length str - 1)
-
 let lineno   = ref 1
 and start    = ref 0
 
@@ -53,14 +51,11 @@ let firstsubdigit = "\226\130"['\129'-'\137']
 let subindex = firstsubdigit subdigit*
 
 
-let universe = ['U'] digit*
-
-
 (* The main body of the lexical analyzer *)
 rule main = parse
   whitespace+                       { main lexbuf }
 | whitespace*("\r")?"\n"            { newline lexbuf; main lexbuf }
-| universe as u                     { Universe {i=info lexbuf;v=(int_of_string (str_tail u))}  }
+| "U"(digit+ as i)                  { Universe {i=info lexbuf;v=(int_of_string i)} }
 | "\\Pi"                            { PI (info lexbuf) }
 | "Pi"                              { PI (info lexbuf) }
 | "\206\160"                        { PI (info lexbuf) }
